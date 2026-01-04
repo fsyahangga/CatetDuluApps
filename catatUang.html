@@ -9,11 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- CORE LAYOUT --- */
+        /* --- CORE LAYOUT FIXES --- */
         html, body {
             height: 100%; margin: 0; padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #d1d7db; overflow: hidden;
+            background-color: #d1d7db; 
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .app-container {
@@ -21,6 +23,7 @@
             height: 100dvh; display: flex; flex-direction: column;
             background-color: #ece5dd; position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
         }
 
         .scroll-hide::-webkit-scrollbar { display: none; }
@@ -34,35 +37,103 @@
         .prog-bg { background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden; }
         .prog-fill { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out; }
 
-        /* --- BACKGROUND CHAT --- */
+        /* --- STYLE BARU UNTUK BACKGROUND CHAT --- */
         .wa-green { background-color: #008069; }
+        
         .chat-bg-layer {
-            position: fixed; top: 0; bottom: 0; width: 100%; max-width: 500px; 
-            left: 50%; transform: translateX(-50%); z-index: 0;
+            position: fixed; 
+            top: 0; bottom: 0;
+            width: 100%; max-width: 500px; 
+            left: 50%; transform: translateX(-50%); 
+            z-index: 0;
             background-color: #efe7dd; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-repeat: repeat; background-size: 400px; opacity: 0.8; pointer-events: none; 
+            background-repeat: repeat; 
+            background-size: 400px;    
+            opacity: 0.8;
+            pointer-events: none; 
         }
 
-        /* --- STICKY REMINDER --- */
-        #sticky-reminder-container {
-            position: sticky; top: 0; z-index: 20; 
-            background-color: rgba(239, 231, 221, 0.9); /* Transparan dikit biar nyatu */
-            backdrop-filter: blur(2px);
-            padding-bottom: 5px;
+        /* Bubble Chat Style */
+        .bubble {
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            max-width: 80%;
+            min-width: 140px;
+            position: relative;
+            margin-bottom: 2px;
         }
-
-        /* --- BUBBLE STYLES --- */
-        .bubble { padding: 8px 12px; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); max-width: 80%; min-width: 140px; position: relative; margin-bottom: 2px; }
         .bubble-me { background-color: #e7ffdb; border-top-right-radius: 0; }
         .bubble-other { background-color: white; border-top-left-radius: 0; }
+        
         .bubble-header { font-size: 9px; font-weight: bold; color: #8c8c8c; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
         .bubble-content { font-size: 14px; color: #303030; margin-bottom: 2px; line-height: 1.3; }
         .bubble-amount { font-size: 16px; font-weight: bold; }
-        .text-inc { color: #10b981; } .text-exp { color: #dc2626; } 
+        .text-inc { color: #10b981; } 
+        .text-exp { color: #dc2626; } 
         .bubble-footer { font-size: 10px; color: #9ca3af; text-align: right; margin-top: 2px; }
-        .bubble-transfer { background-color: #e3f2fd; border-radius: 8px; padding: 8px 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); text-align: center; font-size: 12px; color: #4b5563; }
-        .bubble-system { background-color: #fef9c3; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-align: center; font-size: 0.8rem; border: 1px solid #fde047; margin: 0 auto; width: 90%; }
+
+        .bubble-transfer { 
+            background-color: #e3f2fd; border-radius: 8px; padding: 8px 12px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1); text-align: center;
+            font-size: 12px; color: #4b5563;
+        }
+        .bubble-system { background-color: #fef9c3; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-align: center; font-size: 0.8rem; border: 1px solid #fde047; }
+
+        /* QUICK ACTION CHIPS */
+        .chips-container {
+            display: flex; gap: 8px; overflow-x: auto; padding: 8px 12px;
+            background-color: transparent; 
+            -webkit-overflow-scrolling: touch;
+        }
+        .chip {
+            background-color: white; border: 1px solid #e5e7eb; border-radius: 99px;
+            padding: 4px 12px; font-size: 11px; font-weight: bold; color: #4b5563;
+            white-space: nowrap; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .chip:active { background-color: #e5e7eb; transform: scale(0.95); }
+
+        /* --- DARK MODE OVERRIDES (2.B) --- */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #111b21; }
+            .app-container { background-color: #0b141a; }
+            .chat-bg-layer { background-color: #0b141a; opacity: 0.05; filter: invert(1); } /* Darken bg pattern */
+            
+            /* Text Colors */
+            .text-slate-800, .text-gray-800 { color: #e9edef !important; }
+            .text-slate-700, .text-gray-700 { color: #d1d7db !important; }
+            .text-gray-600, .text-gray-500, .text-gray-400 { color: #8696a0 !important; }
+            
+            /* Backgrounds */
+            .bg-white { background-color: #202c33 !important; border-color: #2a3942 !important; }
+            .bg-gray-50, .bg-gray-100 { background-color: #111b21 !important; }
+            .bg-indigo-50 { background-color: #1f2c33 !important; border-color: #2a3942 !important; }
+            .bg-emerald-50 { background-color: #1f2c33 !important; border-color: #2a3942 !important; }
+            .bg-rose-50 { background-color: #1f2c33 !important; border-color: #2a3942 !important; }
+            .bg-blue-50 { background-color: #1f2c33 !important; border-color: #2a3942 !important; }
+            .bg-yellow-50 { background-color: #2e2b1b !important; border-color: #4a452a !important; }
+
+            /* Bubbles */
+            .bubble-me { background-color: #005c4b !important; }
+            .bubble-other { background-color: #202c33 !important; }
+            .bubble-content { color: #e9edef !important; }
+            .bubble-transfer { background-color: #202c33 !important; color: #e9edef !important; }
+            .bubble-system { background-color: #3b4a54 !important; border-color: #3b4a54 !important; color: #e9edef; }
+            .bubble-system p { color: #e9edef !important; }
+
+            /* Input & Footer */
+            #footer-chat, .chips-container { background-color: #202c33 !important; border-top-color: #2a3942 !important; }
+            #msg-input { color: #e9edef !important; }
+            .chip { background-color: #2a3942 !important; color: #e9edef !important; border-color: #374045 !important; }
+            
+            /* Wallet Cards */
+            .wallet-card.bg-slate-800 { background-color: #2a3942 !important; }
+            
+            /* Inputs in Modals */
+            input, select, textarea { background-color: #2a3942 !important; color: #e9edef !important; border-color: #3b4a54 !important; }
+        }
     </style>
 </head>
 <body>
@@ -72,7 +143,7 @@
         <div class="flex items-center gap-3">
             <div id="user-avatar" onclick="gantiUser()" class="w-10 h-10 bg-emerald-800 rounded-full flex items-center justify-center font-bold border border-white/20 shadow-inner text-lg cursor-pointer active:scale-95 transition-transform" title="Ganti User">A</div>
             <div onclick="gantiUser()" class="cursor-pointer">
-                <h1 class="font-bold text-base leading-tight">✍🏻 #CatetDulu</h1>
+                <h1 class="font-bold text-base leading-tight">✍🏻 #CatetDuluAja</h1>
                 <div class="flex items-center gap-1.5">
                     <span id="sync-status" class="w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"></span>
                     <p id="status-text" class="text-[10px] text-emerald-100 font-medium">Local</p>
@@ -88,7 +159,7 @@
             </button>
             <button onclick="toggleModal('modal-settings')" class="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.187l.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z"/>
+                    <path d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.186l-.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z"/>
                 </svg>
             </button>
         </div>
@@ -195,8 +266,18 @@
         </main>
     </div>
 
-    <footer id="footer-chat" class="p-2 bg-[#f0f2f5] flex flex-col gap-2 border-t border-gray-300 z-40 shrink-0 w-full">
+    <footer id="footer-chat" class="p-2 bg-[#f0f2f5] flex flex-col gap-2 border-t border-gray-300 z-40 shrink-0 w-full transition-colors">
+        <div id="quick-chips" class="chips-container mb-1">
+            </div>
+
         <div class="flex items-center gap-2">
+            <div class="relative">
+                <button id="btn-date" class="bg-white p-2 rounded-full text-gray-500 hover:text-emerald-600 active:scale-95 transition-all shadow-sm border border-gray-200" onclick="document.getElementById('tx-date').showPicker()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </button>
+                <input type="date" id="tx-date" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+            </div>
+
             <select id="active-wallet" class="bg-white border border-gray-300 text-gray-700 text-[10px] rounded-lg px-2 py-2 font-bold outline-none w-20 truncate"></select>
             <div class="flex-1 bg-white rounded-full flex items-center px-4 py-2 shadow-sm border border-gray-200"><input type="text" id="msg-input" placeholder="Cth: Makan 25rb" class="flex-1 outline-none text-sm bg-transparent" autocomplete="off"></div>
             <button onclick="handleSendMessage()" class="w-10 h-10 wa-green text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform">➤</button>
@@ -220,7 +301,10 @@
     <div id="modal-transfer" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transfer Saldo</h3>
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    Transfer Saldo
+                </h3>
                 <button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold hover:text-gray-600 transition-colors">&times;</button>
             </div>
             <div class="space-y-4">
@@ -261,6 +345,17 @@
         <div class="bg-white rounded-2xl w-full max-w-sm flex flex-col max-h-[85vh] shadow-2xl">
             <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg">⛯ Pengaturan</h3><button onclick="toggleModal('modal-settings')" class="text-gray-500 text-2xl">&times;</button></div>
             <div class="p-4 overflow-y-auto space-y-6 scroll-hide">
+                
+                <div class="space-y-2 bg-yellow-50 p-3 rounded-xl border border-yellow-200">
+                    <label class="text-[10px] font-bold text-yellow-700 uppercase block">💾 Backup & Restore Data</label>
+                    <div class="flex gap-2">
+                        <button onclick="backupData()" class="flex-1 py-2 bg-yellow-500 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1">⬇️ Backup</button>
+                        <button onclick="document.getElementById('file-upload').click()" class="flex-1 py-2 bg-blue-500 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1">⬆️ Restore</button>
+                        <input type="file" id="file-upload" class="hidden" onchange="restoreData(this)">
+                    </div>
+                </div>
+                <hr>
+
                 <div class="space-y-2"><label class="text-[10px] font-bold text-gray-400 uppercase">🛜 Koneksi Cloud</label><textarea id="firebase-config-input" class="w-full bg-gray-50 border rounded-xl p-3 text-[10px] font-mono h-20 outline-none focus:border-emerald-500" placeholder='{"apiKey": "AIza...", ...}'></textarea><button onclick="saveSettings()" class="w-full py-2 bg-blue-600 text-white rounded-lg font-bold text-xs">Simpan & Koneksikan</button></div><hr>
                 <div class="space-y-3">
                     <label class="text-[10px] font-bold text-gray-400 uppercase block">👥 Manajemen User (Suami/Istri)</label>
@@ -287,8 +382,20 @@
     let config = JSON.parse(localStorage.getItem('wa_config')) || { categories: { expense: ['Makan', 'Jajan', 'Transport', 'Tagihan', 'Belanja'], income: ['Gaji', 'Bonus'] }, wallets: { 'Cash': 0 }, assets: {}, budgets: {}, goals: [], reminders: [], users: [] };
     let currentUser = localStorage.getItem('wa_user_name') || 'User';
     let chartInstances = { pie: null, userPie: null };
+    
+    // 1.A QUICK CHIPS DATA
+    const quickChips = ["Makan 20rb", "Jajan 10rb", "Bensin 30rb", "Indomaret", "Kopi 15rb", "Sarapan 15rb"];
 
-    window.onload = () => { setupFirebase(); initDateFilters(); renderUI(); renderConfigList(); updateWalletSelects(); renderReminderList(); document.getElementById('msg-input').onkeydown = (e) => e.key === 'Enter' ? handleSendMessage() : null; };
+    window.onload = () => { 
+        setupFirebase(); 
+        initDateFilters(); 
+        renderUI(); 
+        renderConfigList(); 
+        updateWalletSelects(); 
+        renderReminderList(); 
+        renderChips(); // Render chips
+        document.getElementById('msg-input').onkeydown = (e) => e.key === 'Enter' ? handleSendMessage() : null; 
+    };
 
     window.switchTab = (tab) => {
         ['chat', 'data', 'report', 'inquiry', 'plan'].forEach(v => {
@@ -298,22 +405,58 @@
         document.getElementById(`view-${tab}`).classList.remove('hidden');
         document.getElementById(`tab-${tab}`).className = 'flex-1 py-3 tab-active transition-all';
         document.getElementById('footer-chat').style.display = tab === 'chat' ? 'flex' : 'none';
-        
-        // Scroll to top when switching tabs
-        if(tab === 'chat') {
-             scrollToBottom();
-        } else {
-             document.getElementById(`view-${tab}`).scrollTop = 0; 
-        }
-        
-        if(tab === 'report') renderStats(); 
-        if(tab === 'inquiry') renderInquiry(); 
-        if(tab === 'plan') renderPlanning(); 
+        if(tab === 'chat') { scrollToBottom(); } else { document.getElementById(`view-${tab}`).scrollTop = 0; }
+        if(tab === 'report') renderStats(); if(tab === 'inquiry') renderInquiry(); if(tab === 'plan') renderPlanning(); 
     };
 
     window.toggleModal = (id) => {
         const el = document.getElementById(id); el.classList.toggle('hidden');
         if(!el.classList.contains('hidden')) { if(id === 'modal-settings') { document.getElementById('firebase-config-input').value = localStorage.getItem('wa_firebase_config') || ""; renderConfigList(); } if(id === 'modal-transfer') updateWalletSelects(); if(id === 'modal-reminder') renderReminderList(); }
+    };
+
+    // --- 1.A RENDER QUICK CHIPS ---
+    function renderChips() {
+        const container = document.getElementById('quick-chips');
+        container.innerHTML = quickChips.map(c => 
+            `<button onclick="useChip('${c}')" class="chip">${c}</button>`
+        ).join('');
+    }
+    window.useChip = (val) => {
+        document.getElementById('msg-input').value = val;
+        document.getElementById('msg-input').focus();
+    };
+
+    // --- 2.C BACKUP & RESTORE LOGIC ---
+    window.backupData = () => {
+        const data = { transactions, config };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Backup_CatetDulu_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    };
+
+    window.restoreData = (input) => {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(data.transactions && data.config) {
+                    transactions = data.transactions;
+                    config = data.config;
+                    localStorage.setItem('wa_tx_data', JSON.stringify(transactions));
+                    localStorage.setItem('wa_config', JSON.stringify(config));
+                    // If online, ideally we should sync to Firebase too, but for now local restore is enough to view
+                    alert("Data berhasil dipulihkan! Halaman akan dimuat ulang.");
+                    location.reload();
+                } else {
+                    alert("Format file salah!");
+                }
+            } catch(e) { alert("Gagal membaca file!"); }
+        };
+        reader.readAsText(file);
     };
 
     window.gantiUser = () => {
@@ -332,13 +475,7 @@
         toggleModal('modal-user-select');
     };
 
-    window.selectUser = (name) => {
-        currentUser = name;
-        localStorage.setItem('wa_user_name', name);
-        renderUI();
-        toggleModal('modal-user-select');
-    };
-
+    window.selectUser = (name) => { currentUser = name; localStorage.setItem('wa_user_name', name); renderUI(); toggleModal('modal-user-select'); };
     window.renderUI = () => { updateHeader(); renderChat(); renderDataList(); renderStats(); renderInquiry(); renderPlanning(); };
 
     function updateHeader() {
@@ -360,16 +497,38 @@
     window.handleSendMessage = async () => {
         if(!validateUser()) return;
         const input = document.getElementById('msg-input'); const raw = input.value.trim(); if (!raw) return;
+        
+        // --- 1.B BACKDATE LOGIC ---
+        const dateInput = document.getElementById('tx-date').value;
+        // If date selected, use it. Else use current time.
+        // NOTE: New Date(dateInput) creates UTC, transactions usually store ISO. 
+        // Simple fix: append current time to backdate to avoid timezone offset issue showing wrong day.
+        let timestamp;
+        if(dateInput) {
+            const now = new Date();
+            const selected = new Date(dateInput);
+            selected.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+            timestamp = selected.toISOString();
+        } else {
+            timestamp = new Date().toISOString();
+        }
+
         let type = raw.startsWith('+') ? 'income' : 'expense', cleanText = raw.startsWith('+') ? raw.substring(1).trim() : raw, amount = 0, label = cleanText;
         const match = cleanText.match(/(\d+[.,]?\d*)\s*(rb|k|jt|juta|ribu)?/i);
         if (match) { let num = parseFloat(match[1].replace(',', '.')), suffix = match[2]?.toLowerCase(); if (['rb','k','ribu'].includes(suffix)) num *= 1000; if (['jt','juta'].includes(suffix)) num *= 1000000; amount = num; label = cleanText.replace(match[0], '').trim(); }
         if (!label) label = type === 'income' ? 'Pemasukan' : 'Pengeluaran';
         const wallet = document.getElementById('active-wallet').value;
         const category = detectCategory(label, type, wallet);
-        const txData = { user: currentUser, label, amount, type, category, wallet };
+        
+        // Use custom timestamp here instead of serverTimestamp() for local logic, 
+        // for firebase we will handle it.
+        const txData = { user: currentUser, label, amount, type, category, wallet, customDate: timestamp };
+        
         await saveTransaction(txData); 
         input.value = ''; 
         document.getElementById('active-wallet').value = 'Cash'; 
+        // Reset Date input
+        document.getElementById('tx-date').value = '';
         scrollToBottom();
     };
 
@@ -382,8 +541,26 @@
     };
 
     async function saveTransaction(data) {
-        if (db) { try { await addDoc(collection(db, COL_TX), { ...data, timestamp: serverTimestamp() }); } catch (e) { alert("Gagal kirim (Offline?)"); } } 
-        else { transactions.push({ id: Date.now().toString(), ...data, ts: new Date().toISOString() }); localStorage.setItem('wa_tx_data', JSON.stringify(transactions)); renderUI(); }
+        // If we have customDate (from backdate), use it for the 'ts' (local) and timestamp (firebase)
+        const finalTs = data.customDate ? data.customDate : new Date().toISOString();
+        // Remove customDate key before saving to clean up
+        delete data.customDate;
+        
+        if (db) { 
+            // For backdate to work in Firestore sorting, we need a Timestamp object if possible, 
+            // or just save ISO string and order by that. 
+            // Here we use the ISO string for simplicity in 'timestamp' field override if provided.
+            // If it's a real-time entry, we use serverTimestamp.
+            // However, to keep it simple and support backdate, let's just use Date object for Firestore.
+            try { 
+                await addDoc(collection(db, COL_TX), { ...data, timestamp: new Date(finalTs) }); 
+            } catch (e) { alert("Gagal kirim (Offline?)"); } 
+        } 
+        else { 
+            transactions.push({ id: Date.now().toString(), ...data, ts: finalTs }); 
+            localStorage.setItem('wa_tx_data', JSON.stringify(transactions)); 
+            renderUI(); 
+        }
     }
 
     window.deleteTx = async (id) => { if (!confirm("Hapus?")) return; if (db && id.length > 8) await deleteDoc(doc(db, COL_TX, id)); else { transactions = transactions.filter(t => t.id != id); localStorage.setItem('wa_tx_data', JSON.stringify(transactions)); renderUI(); } };
