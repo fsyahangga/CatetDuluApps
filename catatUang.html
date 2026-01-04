@@ -9,25 +9,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- CORE LAYOUT FIXES --- */
+        /* --- CORE LAYOUT --- */
         html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+            height: 100%; margin: 0; padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #d1d7db; 
-            overflow: hidden;
+            background-color: #d1d7db; overflow: hidden;
         }
 
         .app-container {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            background-color: #ece5dd;
-            position: relative;
+            width: 100%; max-width: 500px; margin: 0 auto;
+            height: 100dvh; display: flex; flex-direction: column;
+            background-color: #ece5dd; position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
 
@@ -42,56 +34,35 @@
         .prog-bg { background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden; }
         .prog-fill { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out; }
 
-        /* --- STYLE BARU UNTUK BACKGROUND CHAT --- */
+        /* --- BACKGROUND CHAT --- */
         .wa-green { background-color: #008069; }
-        
-        /* Background Layer Class */
         .chat-bg-layer {
-            position: fixed; /* Kunci posisi agar tidak scroll */
-            top: 0; bottom: 0;
-            width: 100%; max-width: 500px; /* Ikuti lebar container HP */
-            left: 50%; transform: translateX(-50%); /* Tengah layar */
-            z-index: 0;
-            background-color: #efe7dd; /* Warna dasar cream */
+            position: fixed; top: 0; bottom: 0; width: 100%; max-width: 500px; 
+            left: 50%; transform: translateX(-50%); z-index: 0;
+            background-color: #efe7dd; 
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-repeat: repeat; /* Ulang pola */
-            background-size: 400px;    
-            opacity: 0.6;
-            pointer-events: none; /* Agar klik tembus ke chat */
+            background-repeat: repeat; background-size: 400px; opacity: 0.8; pointer-events: none; 
         }
 
-        /* Bubble Chat Style */
-        .bubble {
-            padding: 8px 12px;
-            border-radius: 8px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            max-width: 80%;
-            min-width: 140px;
-            position: relative;
-            margin-bottom: 2px;
+        /* --- STICKY REMINDER --- */
+        #sticky-reminder-container {
+            position: sticky; top: 0; z-index: 20; 
+            background-color: rgba(239, 231, 221, 0.9); /* Transparan dikit biar nyatu */
+            backdrop-filter: blur(2px);
+            padding-bottom: 5px;
         }
-        .bubble-me { 
-            background-color: #e7ffdb; 
-            border-top-right-radius: 0;
-        }
-        .bubble-other { 
-            background-color: white; 
-            border-top-left-radius: 0;
-        }
-        
+
+        /* --- BUBBLE STYLES --- */
+        .bubble { padding: 8px 12px; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); max-width: 80%; min-width: 140px; position: relative; margin-bottom: 2px; }
+        .bubble-me { background-color: #e7ffdb; border-top-right-radius: 0; }
+        .bubble-other { background-color: white; border-top-left-radius: 0; }
         .bubble-header { font-size: 9px; font-weight: bold; color: #8c8c8c; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px; }
         .bubble-content { font-size: 14px; color: #303030; margin-bottom: 2px; line-height: 1.3; }
         .bubble-amount { font-size: 16px; font-weight: bold; }
-        .text-inc { color: #10b981; } 
-        .text-exp { color: #dc2626; } 
+        .text-inc { color: #10b981; } .text-exp { color: #dc2626; } 
         .bubble-footer { font-size: 10px; color: #9ca3af; text-align: right; margin-top: 2px; }
-
-        .bubble-transfer { 
-            background-color: #e3f2fd; border-radius: 8px; padding: 8px 12px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1); text-align: center;
-            font-size: 12px; color: #4b5563;
-        }
-        .bubble-system { background-color: #fef9c3; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-align: center; font-size: 0.8rem; border: 1px solid #fde047; }
+        .bubble-transfer { background-color: #e3f2fd; border-radius: 8px; padding: 8px 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); text-align: center; font-size: 12px; color: #4b5563; }
+        .bubble-system { background-color: #fef9c3; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); text-align: center; font-size: 0.8rem; border: 1px solid #fde047; margin: 0 auto; width: 90%; }
     </style>
 </head>
 <body>
@@ -116,8 +87,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
             </button>
             <button onclick="toggleModal('modal-settings')" class="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear-wide-connected" viewBox="0 0 15 15">
-                <path d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.187l.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.187l.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z"/>
                 </svg>
             </button>
         </div>
@@ -134,8 +105,9 @@
     <div class="flex-1 overflow-y-auto relative w-full" style="overscroll-behavior: contain;">
         <main id="view-chat" class="absolute inset-0 overflow-y-auto scroll-hide">
             <div class="chat-bg-layer"></div>
-            <div class="relative z-10 p-4 space-y-3 flex flex-col min-h-full">
-                <div id="messages-list" class="space-y-3 pb-20 flex-1"></div>
+            <div class="relative z-10 flex flex-col min-h-full">
+                <div id="sticky-reminder-container" class="w-full px-4 pt-4"></div>
+                <div id="messages-list" class="space-y-3 px-4 pb-20 pt-2 flex-1"></div>
             </div>
         </main>
 
@@ -171,7 +143,7 @@
                 <div id="bill-list" class="divide-y divide-gray-50 max-h-48 overflow-y-auto p-0"></div>
             </div>
             <div class="space-y-4">
-                <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">📊 Transparansi </h3><div class="relative h-48 w-full"><canvas id="userChart"></canvas></div></div>
+                <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">📊 Transparansi (Suami vs Istri)</h3><div class="relative h-48 w-full"><canvas id="userChart"></canvas></div></div>
                 <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">🛒 Per Kategori</h3><div class="relative h-48 w-full"><canvas id="pieChart"></canvas></div></div>
             </div>
             <button onclick="exportData()" class="w-full bg-[#128c7e] text-white py-3 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2 mb-10">📥 Unduh Laporan (CSV)</button>
@@ -248,10 +220,7 @@
     <div id="modal-transfer" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                    Transfer Saldo
-                </h3>
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Transfer Saldo</h3>
                 <button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold hover:text-gray-600 transition-colors">&times;</button>
             </div>
             <div class="space-y-4">
@@ -283,8 +252,7 @@
     <div id="modal-user-select" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
             <h3 class="font-bold text-lg mb-4 text-slate-800 text-center">Pilih Pengguna</h3>
-            <div id="user-list-container" class="space-y-2 max-h-60 overflow-y-auto">
-                </div>
+            <div id="user-list-container" class="space-y-2 max-h-60 overflow-y-auto"></div>
             <button onclick="toggleModal('modal-user-select')" class="w-full mt-4 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">Batal</button>
         </div>
     </div>
@@ -333,8 +301,6 @@
         
         // Scroll to top when switching tabs
         if(tab === 'chat') {
-             // For chat, we might want to stay at bottom, but if user scrolled up, let it be.
-             // Actually, usually switching to chat should go to bottom.
              scrollToBottom();
         } else {
              document.getElementById(`view-${tab}`).scrollTop = 0; 
@@ -350,14 +316,12 @@
         if(!el.classList.contains('hidden')) { if(id === 'modal-settings') { document.getElementById('firebase-config-input').value = localStorage.getItem('wa_firebase_config') || ""; renderConfigList(); } if(id === 'modal-transfer') updateWalletSelects(); if(id === 'modal-reminder') renderReminderList(); }
     };
 
-    // --- NEW: USER SELECTION LOGIC ---
     window.gantiUser = () => {
         if (!config.users || config.users.length === 0) {
             alert("Belum ada user terdaftar! Silakan tambah di Pengaturan > Manajemen User.");
             toggleModal('modal-settings');
             return;
         }
-        
         const container = document.getElementById('user-list-container');
         container.innerHTML = config.users.map(u => `
             <button onclick="selectUser('${u.name}')" class="w-full flex justify-between items-center p-3 rounded-xl border ${u.name === currentUser ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'}">
@@ -365,7 +329,6 @@
                 <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">${u.role}</span>
             </button>
         `).join('');
-        
         toggleModal('modal-user-select');
     };
 
@@ -401,9 +364,13 @@
         const match = cleanText.match(/(\d+[.,]?\d*)\s*(rb|k|jt|juta|ribu)?/i);
         if (match) { let num = parseFloat(match[1].replace(',', '.')), suffix = match[2]?.toLowerCase(); if (['rb','k','ribu'].includes(suffix)) num *= 1000; if (['jt','juta'].includes(suffix)) num *= 1000000; amount = num; label = cleanText.replace(match[0], '').trim(); }
         if (!label) label = type === 'income' ? 'Pemasukan' : 'Pengeluaran';
-        const category = detectCategory(label, type), wallet = document.getElementById('active-wallet').value;
+        const wallet = document.getElementById('active-wallet').value;
+        const category = detectCategory(label, type, wallet);
         const txData = { user: currentUser, label, amount, type, category, wallet };
-        await saveTransaction(txData); input.value = ''; scrollToBottom();
+        await saveTransaction(txData); 
+        input.value = ''; 
+        document.getElementById('active-wallet').value = 'Cash'; 
+        scrollToBottom();
     };
 
     window.handleTransfer = async () => {
@@ -433,7 +400,21 @@
         if (db && id.length > 8) { await updateDoc(doc(db, COL_TX, id), { label, amount, wallet, category }); } else { const idx = transactions.findIndex(t => t.id == id); if (idx !== -1) { transactions[idx] = { ...transactions[idx], label, amount, wallet, category }; localStorage.setItem('wa_tx_data', JSON.stringify(transactions)); renderUI(); } } closeEditModal();
     };
 
-    function detectCategory(label, type) { const l = label.toLowerCase(); for (let c of config.categories[type]) { if (l.includes(c.toLowerCase())) return c; } return config.categories[type][0]; }
+    function detectCategory(label, type, wallet) {
+        const l = label.toLowerCase();
+        const w = wallet ? wallet.toLowerCase() : '';
+        if (type === 'income') {
+            if (w.includes('mandiri') || l.includes('gaji')) return 'Gaji';
+            return config.categories.income[0]; 
+        }
+        if (type === 'expense') {
+            if (l.includes('beli nasi') || l.includes('nasi') || l.includes('makan')) return 'Makan';
+            if (l.includes('pentol') || l.includes('warkop') || l.includes('makanan kecil') || l.includes('snack') || l.includes('jajan')) return 'Jajan';
+            if (l.includes('shopee') || l.includes('dana') || l.includes('gopay') || w.includes('shopee') || w.includes('dana') || w.includes('gopay')) return 'Belanja';
+        }
+        for (let c of config.categories[type]) { if (l.includes(c.toLowerCase())) return c; }
+        return config.categories[type][0];
+    }
 
     // --- USER MANAGEMENT ---
     window.addUser = async () => { const name = document.getElementById('new-user-name').value.trim(); const role = document.getElementById('new-user-role').value; if(name) { if(!config.users) config.users = []; if(config.users.some(u => u.name.toLowerCase() === name.toLowerCase())) return alert("User sudah ada!"); config.users.push({name, role}); await saveConfig(); document.getElementById('new-user-name').value = ''; renderConfigList(); } };
@@ -525,7 +506,20 @@
         const filtered = transactions.filter(t => { const d = new Date(t.ts); return d.getMonth() === m && d.getFullYear() === y; });
         let inc = 0, exp = 0, cats = {}, userExp = {};
         filtered.forEach(t => { if(t.type === 'income') { inc += t.amount; } else if(t.type === 'expense') { exp += t.amount; cats[t.category] = (cats[t.category] || 0) + t.amount; userExp[t.user] = (userExp[t.user] || 0) + t.amount; } });
+        // --- FIX REPORT BILL LOGIC ---
+        let billTotal = 0;
+        let billItems = filtered.filter(t => {
+            if (t.type === 'expense' && (t.category.toLowerCase().includes('tagihan') || t.label.toLowerCase().includes('tagihan'))) {
+                billTotal += t.amount;
+                return true;
+            }
+            return false;
+        });
+        
         document.getElementById('total-income').innerText = `Rp ${inc.toLocaleString()}`; document.getElementById('total-expense').innerText = `Rp ${exp.toLocaleString()}`; document.getElementById('total-balance').innerText = `Rp ${(inc-exp).toLocaleString()}`;
+        document.getElementById('bill-total').innerText = `Rp ${billTotal.toLocaleString()}`;
+        document.getElementById('bill-list').innerHTML = billItems.length ? billItems.map(t => `<div class="flex justify-between items-center p-3 hover:bg-gray-50"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()}</p></div><p class="text-xs font-black text-rose-600">Rp ${t.amount.toLocaleString()}</p></div>`).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan di bulan ini.</p>`;
+
         if(!document.getElementById('view-report').classList.contains('hidden')) { if(chartInstances.pie) chartInstances.pie.destroy(); if(chartInstances.userPie) chartInstances.userPie.destroy(); const pieCtx = document.getElementById('pieChart').getContext('2d'); chartInstances.pie = new Chart(pieCtx, { type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); const userCtx = document.getElementById('userChart').getContext('2d'); chartInstances.userPie = new Chart(userCtx, { type: 'pie', data: { labels: Object.keys(userExp), datasets: [{ data: Object.values(userExp), backgroundColor: ['#3b82f6', '#ec4899', '#f97316'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); }
     }
 
@@ -549,15 +543,22 @@
     function renderChat() { 
         const list = document.getElementById('messages-list'); 
         list.innerHTML = ''; 
+        
+        // --- STICKY REMINDER (Render di container terpisah agar tidak scroll bersama chat) ---
+        const stickyContainer = document.getElementById('sticky-reminder-container');
+        stickyContainer.innerHTML = '';
+
         if(config.reminders && config.reminders.length > 0) {
             const today = new Date(); today.setHours(0,0,0,0);
             config.reminders.forEach(r => {
                 const due = new Date(r.date); const timeDiff = due - today; const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
                 if (daysDiff >= 0 && daysDiff <= r.alertBefore) {
-                    list.innerHTML += `<div class="flex justify-center my-2"><div class="bubble-system px-4 py-2 w-3/4"><p class="font-bold text-yellow-700">🔔 PENGINGAT: ${r.title}</p><p class="text-xs text-yellow-600">Jatuh Tempo: ${new Date(r.date).toLocaleDateString()}</p><p class="text-xs font-bold ${daysDiff === 0 ? 'text-red-600 animate-pulse' : 'text-slate-500'}">${daysDiff === 0 ? 'HARI INI!' : (daysDiff + ' hari lagi')}</p></div></div>`;
+                    // Render ke sticky container, bukan ke list chat
+                    stickyContainer.innerHTML += `<div class="bubble-system px-4 py-2 w-full mb-2"><p class="font-bold text-yellow-700">🔔 PENGINGAT: ${r.title}</p><p class="text-xs text-yellow-600">Jatuh Tempo: ${new Date(r.date).toLocaleDateString()}</p><p class="text-xs font-bold ${daysDiff === 0 ? 'text-red-600 animate-pulse' : 'text-slate-500'}">${daysDiff === 0 ? 'HARI INI!' : (daysDiff + ' hari lagi')}</p></div>`;
                 }
             });
         }
+
         transactions.forEach(t => { 
             const isMe = t.user === currentUser; 
             if(t.type === 'transfer') { 
@@ -576,7 +577,7 @@
                 <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full">
                     <div class="bubble ${isMe ? 'bubble-me' : 'bubble-other'}">
                         <div class="bubble-header flex justify-between items-center">
-                            <span>${t.category} ⌯⌲ ${t.wallet || 'Cash'}</span>
+                            <span>${t.category} • ${t.wallet || 'Cash'}-${t.user.toUpperCase()}</span>
                             ${isMe ? `<button onclick="deleteTx('${t.id}')" class="text-red-400 font-bold ml-2">×</button>` : ''}
                         </div>
                         <div class="bubble-content font-medium">${t.label}</div>
