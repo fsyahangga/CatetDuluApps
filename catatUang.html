@@ -72,23 +72,20 @@
         .chip { background-color: white; border: 1px solid #e5e7eb; border-radius: 99px; padding: 4px 12px; font-size: 11px; font-weight: bold; color: #4b5563; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s; }
         .chip:active { background-color: #e5e7eb; transform: scale(0.95); }
 
-        /* --- DARK MODE MANUAL (CLASS BASED) --- */
+        /* --- DARK MODE MANUAL --- */
         body.dark-mode { background-color: #111b21; }
         body.dark-mode .app-container { background-color: #0b141a; }
         body.dark-mode .chat-bg-layer { background-color: #0b141a; opacity: 0.05; filter: invert(1); }
         body.dark-mode #sticky-reminder-container { background-color: rgba(11, 20, 26, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Text Colors Dark Mode */
         body.dark-mode .text-slate-800, body.dark-mode .text-gray-800, body.dark-mode .text-slate-700 { color: #e9edef !important; }
         body.dark-mode .text-gray-600, body.dark-mode .text-gray-500, body.dark-mode .text-gray-400 { color: #8696a0 !important; }
         
-        /* Backgrounds Dark Mode */
         body.dark-mode .bg-white { background-color: #202c33 !important; border-color: #2a3942 !important; color: #e9edef !important; }
         body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #111b21 !important; color: #e9edef !important; border-color: #2a3942 !important; }
         body.dark-mode .bg-indigo-50, body.dark-mode .bg-emerald-50, body.dark-mode .bg-rose-50, body.dark-mode .bg-blue-50 { background-color: #1f2c33 !important; border-color: #2a3942 !important; }
         body.dark-mode .bg-yellow-50 { background-color: #2e2b1b !important; border-color: #4a452a !important; }
         
-        /* Bubbles Dark Mode */
         body.dark-mode .bubble-me { background-color: #005c4b !important; }
         body.dark-mode .bubble-other { background-color: #202c33 !important; }
         body.dark-mode .bubble-content { color: #e9edef !important; }
@@ -96,16 +93,15 @@
         body.dark-mode .bubble-system { background-color: #3b4a54 !important; border-color: #3b4a54 !important; color: #e9edef !important; }
         body.dark-mode .bubble-system p { color: #e9edef !important; }
 
-        /* Components Dark Mode */
         body.dark-mode #footer-chat, body.dark-mode .chips-container { background-color: #202c33 !important; border-top-color: #2a3942 !important; }
         body.dark-mode #msg-input { color: #e9edef !important; }
         body.dark-mode .chip { background-color: #2a3942 !important; color: #e9edef !important; border-color: #374045 !important; }
         body.dark-mode .wallet-card.bg-slate-800 { background-color: #2a3942 !important; }
         body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #2a3942 !important; color: #e9edef !important; border-color: #3b4a54 !important; }
         
-        /* FIX: Category Chips in Settings for Dark Mode */
         body.dark-mode #list-expense-cats span, 
-        body.dark-mode #list-income-cats span {
+        body.dark-mode #list-income-cats span,
+        body.dark-mode #list-chips-config span {
             background-color: #202c33 !important;
             color: #e9edef !important;
             border-color: #2a3942 !important;
@@ -119,7 +115,7 @@
         <div class="flex items-center gap-3">
             <div id="user-avatar" onclick="gantiUser()" class="w-10 h-10 bg-emerald-800 rounded-full flex items-center justify-center font-bold border border-white/20 shadow-inner text-lg cursor-pointer active:scale-95 transition-transform" title="Ganti User">A</div>
             <div onclick="gantiUser()" class="cursor-pointer">
-                <h1 class="font-bold text-base leading-tight">✍🏻 #CatetDuluAja</h1>
+                <h1 class="font-bold text-base leading-tight">#CatetDulu</h1>
                 <div class="flex items-center gap-1.5">
                     <span id="sync-status" class="w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"></span>
                     <p id="status-text" class="text-[10px] text-emerald-100 font-medium">Local</p>
@@ -243,7 +239,8 @@
     </div>
 
     <footer id="footer-chat" class="p-2 bg-[#f0f2f5] flex flex-col gap-2 border-t border-gray-300 z-40 shrink-0 w-full transition-colors">
-        <div id="quick-chips" class="chips-container mb-1"></div>
+        <div id="quick-chips" class="chips-container mb-1">
+            </div>
 
         <div class="flex items-center gap-2">
             <div class="relative">
@@ -280,7 +277,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                     Transfer Saldo
                 </h3>
-                <button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold hover:text-gray-600 transition-colors">&times;</button>
+                <button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold hover:text-gray-600 transition-colors">×</button>
             </div>
             <div class="space-y-4">
                 <div class="flex gap-2 items-center"><div class="flex-1"><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Dari</label><select id="tf-from" class="w-full border rounded-lg p-2 text-sm bg-gray-50 font-bold outline-none"></select></div><div class="text-gray-300">➜</div><div class="flex-1"><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Ke</label><select id="tf-to" class="w-full border rounded-lg p-2 text-sm bg-gray-50 font-bold outline-none"></select></div></div>
@@ -295,7 +292,7 @@
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Buat Pengingat</h3>
-                <button onclick="toggleModal('modal-reminder')" class="text-gray-400 text-2xl font-bold">&times;</button>
+                <button onclick="toggleModal('modal-reminder')" class="text-gray-400 text-2xl font-bold">×</button>
             </div>
             <div class="space-y-4">
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Judul Pengingat</label><input type="text" id="remind-title" placeholder="Cth: Perpanjang SIM" class="w-full border rounded-lg p-2.5 text-sm"></div>
@@ -322,7 +319,7 @@
                 <h3 class="font-bold text-lg">⛯ Pengaturan</h3>
                 <div class="flex items-center gap-3">
                     <button onclick="toggleDarkMode()" title="Ganti Tema" class="text-xl">🌓</button>
-                    <button onclick="toggleModal('modal-settings')" class="text-gray-500 text-2xl">&times;</button>
+                    <button onclick="toggleModal('modal-settings')" class="text-gray-500 text-2xl">×</button>
                 </div>
             </div>
             
@@ -340,11 +337,20 @@
                 <div class="space-y-2"><label class="text-[10px] font-bold text-gray-400 uppercase">🛜 Koneksi Cloud</label><textarea id="firebase-config-input" class="w-full bg-gray-50 border rounded-xl p-3 text-[10px] font-mono h-20 outline-none focus:border-emerald-500" placeholder='{"apiKey": "AIza...", ...}'></textarea><button onclick="saveSettings()" class="w-full py-2 bg-blue-600 text-white rounded-lg font-bold text-xs">Simpan & Koneksikan</button></div><hr>
                 <div class="space-y-3">
                     <label class="text-[10px] font-bold text-gray-400 uppercase block">👥 Manajemen User (Suami/Istri)</label>
-                    <div class="flex gap-2 mb-2"><input type="text" id="new-user-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama ..."><select id="new-user-role" class="border px-2 py-1 rounded-lg text-xs bg-white text-gray-600 font-bold"><option value="Suami">Suami</option><option value="Istri">Istri</option></select><button onclick="addUser()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div>
+                    <div class="flex gap-2 mb-2"><input type="text" id="new-user-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama (Angga/Veda)..."><select id="new-user-role" class="border px-2 py-1 rounded-lg text-xs bg-white text-gray-600 font-bold"><option value="Suami">Suami</option><option value="Istri">Istri</option></select><button onclick="addUser()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div>
                     <div id="list-users-config" class="space-y-1"></div>
                 </div><hr>
                 <div class="space-y-3"><label class="text-[10px] font-bold text-gray-400 uppercase block">📈 Aset Investasi</label><div class="flex gap-2 mb-2"><input type="text" id="new-asset-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama..."><button onclick="addAsset()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div><div id="list-assets-config" class="space-y-1"></div></div><hr>
                 <div class="space-y-3"><label class="text-[10px] font-bold text-gray-400 uppercase block">🚨 Budget Bulanan</label><div id="budget-settings-list" class="space-y-2"></div></div><hr>
+                <div class="space-y-3">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase block">⚡ Quick Actions</label>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="new-chip-text" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Cth: ☕ Kopi 15rb">
+                        <button onclick="addQuickChip()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button>
+                    </div>
+                    <div id="list-chips-config" class="flex flex-wrap gap-1"></div>
+                </div>
+                <hr>
                 <div class="space-y-3"><label class="text-[10px] font-bold text-gray-400 uppercase block">💳 Wallet</label><div class="flex gap-2 mb-2"><input type="text" id="new-wallet-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama..."><input type="number" id="new-wallet-bal" class="w-20 border px-2 py-1 rounded-lg text-xs" placeholder="Awal Rp"><button onclick="addWallet()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div><div id="list-wallets-config" class="space-y-1"></div></div><hr>
                 <div class="space-y-4"><label class="text-[10px] font-bold text-gray-400 uppercase block">🏷️ Kategori</label><div><p class="text-[10px] font-bold text-rose-500 mb-1">💸Pengeluaran</p><div class="flex gap-2 mb-2"><input type="text" id="new-expense-cat" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama..."><button onclick="tambahKategori('expense')" class="bg-rose-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div><div id="list-expense-cats" class="flex flex-wrap gap-1"></div></div><div><p class="text-[10px] font-bold text-emerald-500 mb-1">💰 Pemasukan</p><div class="flex gap-2 mb-2"><input type="text" id="new-income-cat" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama..."><button onclick="tambahKategori('income')" class="bg-emerald-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div><div id="list-income-cats" class="flex flex-wrap gap-1"></div></div></div>
             </div>
@@ -360,51 +366,29 @@
     let db = null, auth = null;
     const COL_TX = 'transactions', COL_DATA = 'app_data', DOC_CONFIG = 'config';
     let transactions = JSON.parse(localStorage.getItem('wa_tx_data')) || [];
-    let config = JSON.parse(localStorage.getItem('wa_config')) || { categories: { expense: ['Makan', 'Jajan', 'Transport', 'Tagihan', 'Belanja'], income: ['Gaji', 'Bonus'] }, wallets: { 'Cash': 0 }, assets: {}, budgets: {}, goals: [], reminders: [], users: [] };
+    
+    // --- 1.A DEFAULT QUICK CHIPS ---
+    const defaultChips = ["🍜 Makan 20rb", "🍔 Jajan 10rb","🚬 Rokok 27rb", "⛽ Bensin 30rb", "🛒 Indomaret 100rb", "☕️ Kopi 15rb", "🍽️ Sarapan 15rb", "🛍️ Belanja 30rb"];
+    
+    let config = JSON.parse(localStorage.getItem('wa_config')) || { 
+        categories: { expense: ['Makan', 'Jajan', 'Transport', 'Tagihan', 'Belanja'], income: ['Gaji', 'Bonus'] }, 
+        wallets: { 'Cash': 0 }, 
+        assets: {}, 
+        budgets: {}, 
+        goals: [], 
+        reminders: [], 
+        users: [],
+        quickChips: defaultChips // Set default if new
+    };
+
+    // Ensure quickChips exists for old users
+    if(!config.quickChips) config.quickChips = defaultChips;
+
     let currentUser = localStorage.getItem('wa_user_name') || 'User';
     let chartInstances = { pie: null, userPie: null };
     
-    if (window.location.pathname.endsWith('/index.html')) {
-        // Ambil URL tanpa 'index.html'
-        var cleanUrl = window.location.pathname.replace('/index.html', '/');
-        // Ubah tampilan di address bar tanpa reload halaman
-        window.history.replaceState(null, '', cleanUrl);
-    }
-
-    // 1. Matikan Klik Kanan
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
-
-    // 2. Matikan Kombinasi Tombol Keyboard
-    document.onkeydown = function(e) {
-        // Cek apakah tombol CTRL ditekan
-        if (e.ctrlKey) {
-            // Ctrl + U (View Source)
-            if (e.keyCode === 85) {
-                return false;
-            }
-            // Ctrl + Shift + I (DevTools)
-            if (e.shiftKey && e.keyCode === 73) {
-                return false;
-            }
-            // Ctrl + Shift + J (Console)
-            if (e.shiftKey && e.keyCode === 74) {
-                return false;
-            }
-            // Ctrl + Shift + C (Inspect Element)
-            if (e.shiftKey && e.keyCode === 67) {
-                return false;
-            }
-        }
-
-        // Tombol F12 (DevTools)
-        if (e.keyCode === 123) {
-            return false;
-        }
-    };
     // 1.A QUICK CHIPS DATA
-    const quickChips = ["🍜 Makan 20rb", "🍔 Jajan 10rb","🚬 Rokok 27rb", "⛽ Bensin 30rb", "🛒 Indomaret 100rb", "☕️ Kopi 15rb", "🍽️ Sarapan 15rb", "🛍️ Belanja 30rb"];
+    const quickChips = ["Makan 20rb", "Jajan 10rb", "Bensin 30rb", "Indomaret", "Kopi 15rb", "Sarapan 15rb"];
 
     window.onload = () => { 
         // 3. LOAD DARK MODE
@@ -418,6 +402,11 @@
         renderReminderList(); 
         renderChips(); // Render chips
         document.getElementById('msg-input').onkeydown = (e) => e.key === 'Enter' ? handleSendMessage() : null; 
+        
+        // Force scroll to bottom on initial load
+        if(!document.getElementById('view-chat').classList.contains('hidden')) {
+            scrollToBottom();
+        }
     };
 
     // --- 4. TOGGLE DARK MODE FUNCTION ---
@@ -446,13 +435,36 @@
     // --- 1.A RENDER QUICK CHIPS ---
     function renderChips() {
         const container = document.getElementById('quick-chips');
-        container.innerHTML = quickChips.map(c => 
+        const chipsToRender = config.quickChips || defaultChips;
+        container.innerHTML = chipsToRender.map(c => 
             `<button onclick="useChip('${c}')" class="chip">${c}</button>`
         ).join('');
     }
     window.useChip = (val) => {
         document.getElementById('msg-input').value = val;
         document.getElementById('msg-input').focus();
+    };
+    
+    // --- NEW: QUICK CHIP MANAGEMENT LOGIC ---
+    window.addQuickChip = async () => {
+        const input = document.getElementById('new-chip-text');
+        const val = input.value.trim();
+        if(val) {
+            if(!config.quickChips) config.quickChips = [];
+            config.quickChips.push(val);
+            await saveConfig();
+            input.value = '';
+            renderConfigList();
+            renderChips();
+        }
+    };
+    window.deleteQuickChip = async (index) => {
+        if(confirm("Hapus Quick Action ini?")) {
+            config.quickChips.splice(index, 1);
+            await saveConfig();
+            renderConfigList();
+            renderChips();
+        }
     };
 
     // --- 2.C BACKUP & RESTORE LOGIC ---
@@ -614,8 +626,8 @@
             return config.categories.income[0]; 
         }
         if (type === 'expense') {
-            if (l.includes('beli nasi') || l.includes('nasi') || l.includes('makan') || l.includes('sarapan')|| l.includes('makan')) return 'Makan';
-            if (l.includes('pentol') || l.includes('warkop') || l.includes('makanan kecil') || l.includes('snack') || l.includes('jajan')|| l.includes('rokok')) return 'Jajan';
+            if (l.includes('beli nasi') || l.includes('nasi') || l.includes('makan')) return 'Makan';
+            if (l.includes('pentol') || l.includes('warkop') || l.includes('makanan kecil') || l.includes('snack') || l.includes('jajan')) return 'Jajan';
             if (l.includes('shopee') || l.includes('dana') || l.includes('gopay') || w.includes('shopee') || w.includes('dana') || w.includes('gopay')) return 'Belanja';
         }
         for (let c of config.categories[type]) { if (l.includes(c.toLowerCase())) return c; }
@@ -678,6 +690,12 @@
         const assetList = config.assets || {}; document.getElementById('list-assets-config').innerHTML = Object.entries(assetList).map(([name, val]) => `<div class="flex justify-between items-center bg-emerald-50 px-2 py-1 rounded text-[10px] border border-emerald-100"><span class="font-bold text-emerald-700">${name} <span class="font-normal text-gray-500">(Rp ${val.toLocaleString()})</span></span><button onclick="deleteAsset('${name}')" class="text-red-400 font-bold">×</button></div>`).join('');
         ['expense', 'income'].forEach(type => { document.getElementById(`list-${type}-cats`).innerHTML = config.categories[type].map(c => `<span class="bg-gray-100 border px-2 py-1 rounded text-[10px] flex items-center gap-1 group">${c} <button onclick="hapusKategori('${type}','${c}')" class="text-red-400 font-bold">×</button></span>`).join(''); });
         document.getElementById('budget-settings-list').innerHTML = config.categories.expense.map(cat => `<div class="flex items-center gap-2"><span class="text-xs flex-1 text-gray-600">${cat}</span><input type="number" placeholder="Limit Rp..." value="${(config.budgets && config.budgets[cat]) ? config.budgets[cat] : ''}" onchange="updateBudget('${cat}', parseFloat(this.value))" class="w-24 border rounded p-1 text-xs bg-gray-50"></div>`).join('');
+        
+        // --- NEW: RENDER QUICK CHIPS CONFIG ---
+        const chips = config.quickChips || defaultChips;
+        document.getElementById('list-chips-config').innerHTML = chips.map((c, index) => 
+            `<span class="bg-gray-100 border px-2 py-1 rounded text-[10px] flex items-center gap-1 group">${c} <button onclick="deleteQuickChip(${index})" class="text-red-400 font-bold">×</button></span>`
+        ).join('');
     }
 
     // --- NEW: EDIT WALLET FUNCTION ---
@@ -711,6 +729,7 @@
         const m = parseInt(document.getElementById('filter-month').value), y = parseInt(document.getElementById('filter-year').value);
         const filtered = transactions.filter(t => { const d = new Date(t.ts); return d.getMonth() === m && d.getFullYear() === y; });
         let inc = 0, exp = 0, cats = {}, userExp = {};
+        
         // --- FIX REPORT BILL LOGIC & PREVENT CRASH ---
         let billTotal = 0;
         let billItems = [];
@@ -734,9 +753,11 @@
                 }
             } 
         });
+        
         document.getElementById('total-income').innerText = `Rp ${inc.toLocaleString()}`; document.getElementById('total-expense').innerText = `Rp ${exp.toLocaleString()}`; document.getElementById('total-balance').innerText = `Rp ${(inc-exp).toLocaleString()}`;
         document.getElementById('bill-total').innerText = `Rp ${billTotal.toLocaleString()}`;
         document.getElementById('bill-list').innerHTML = billItems.length ? billItems.map(t => `<div class="flex justify-between items-center p-3 hover:bg-gray-50"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()}</p></div><p class="text-xs font-black text-rose-600">Rp ${t.amount.toLocaleString()}</p></div>`).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan di bulan ini.</p>`;
+
         if(!document.getElementById('view-report').classList.contains('hidden')) { if(chartInstances.pie) chartInstances.pie.destroy(); if(chartInstances.userPie) chartInstances.userPie.destroy(); const pieCtx = document.getElementById('pieChart').getContext('2d'); chartInstances.pie = new Chart(pieCtx, { type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); const userCtx = document.getElementById('userChart').getContext('2d'); chartInstances.userPie = new Chart(userCtx, { type: 'pie', data: { labels: Object.keys(userExp), datasets: [{ data: Object.values(userExp), backgroundColor: ['#3b82f6', '#ec4899', '#f97316'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); }
     }
 
