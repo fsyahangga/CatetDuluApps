@@ -55,6 +55,30 @@
             border-bottom: 1px solid rgba(0,0,0,0.05); transition: background-color 0.3s;
         }
 
+        /* --- FLOATING BUTTONS (FIXED POSITION) --- */
+        .float-btn-group {
+            position: absolute;
+            bottom: 90px; /* Jarak dari bawah agar tidak tertutup keyboard/footer */
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100; /* Paling atas */
+        }
+
+        .btn-float {
+            width: 40px; height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            color: #54656f;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s;
+        }
+        .btn-float:active { transform: scale(0.9); background-color: #f0f2f5; }
+
         /* BUBBLE STYLES */
         .bubble { padding: 8px 12px; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); max-width: 80%; min-width: 140px; position: relative; margin-bottom: 2px; }
         .bubble-me { background-color: #e7ffdb; border-top-right-radius: 0; }
@@ -77,6 +101,8 @@
         body.dark-mode .app-container { background-color: #0b141a; }
         body.dark-mode .chat-bg-layer { background-color: #0b141a; opacity: 0.05; filter: invert(1); }
         body.dark-mode #sticky-reminder-container { background-color: rgba(11, 20, 26, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        body.dark-mode .btn-float { background-color: #202c33; color: #e9edef; border-color: #374045; }
 
         body.dark-mode .text-slate-800, body.dark-mode .text-gray-800, body.dark-mode .text-slate-700 { color: #e9edef !important; }
         body.dark-mode .text-gray-600, body.dark-mode .text-gray-500, body.dark-mode .text-gray-400 { color: #8696a0 !important; }
@@ -115,7 +141,7 @@
         <div class="flex items-center gap-3">
             <div id="user-avatar" onclick="gantiUser()" class="w-10 h-10 bg-emerald-800 rounded-full flex items-center justify-center font-bold border border-white/20 shadow-inner text-lg cursor-pointer active:scale-95 transition-transform" title="Ganti User">A</div>
             <div onclick="gantiUser()" class="cursor-pointer">
-                <h1 class="font-bold text-base leading-tight">#CatetDulu</h1>
+                <h1 class="font-bold text-base leading-tight">✍🏻 #CatetDuluAja</h1>
                 <div class="flex items-center gap-1.5">
                     <span id="sync-status" class="w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"></span>
                     <p id="status-text" class="text-[10px] text-emerald-100 font-medium">Local</p>
@@ -152,6 +178,15 @@
                 <div id="sticky-reminder-container" class="w-full px-4 pt-4"></div>
                 <div id="messages-list" class="space-y-3 px-4 pb-20 pt-2 flex-1"></div>
             </div>
+            
+            <div class="float-btn-group">
+                <div class="btn-float" onclick="scrollToTop()" title="Ke Atas">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </div>
+                <div class="btn-float" onclick="scrollToBottom()" title="Ke Bawah">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+            </div>
         </main>
 
         <main id="view-data" class="hidden absolute inset-0 bg-gray-50 pb-20 scroll-hide overflow-y-auto">
@@ -186,7 +221,7 @@
                 <div id="bill-list" class="divide-y divide-gray-50 max-h-48 overflow-y-auto p-0"></div>
             </div>
             <div class="space-y-4">
-                <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">📊 Transparansi (Suami vs Istri)</h3><div class="relative h-48 w-full"><canvas id="userChart"></canvas></div></div>
+                <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">📊 Transparansi Cashflow</h3><div class="relative h-48 w-full"><canvas id="userChart"></canvas></div></div>
                 <div class="bg-white rounded-3xl shadow-sm p-4"><h3 class="text-xs font-bold text-gray-400 uppercase text-center mb-2">🛒 Per Kategori</h3><div class="relative h-48 w-full"><canvas id="pieChart"></canvas></div></div>
             </div>
             <button onclick="exportData()" class="w-full bg-[#128c7e] text-white py-3 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2 mb-10">📥 Unduh Laporan (CSV)</button>
@@ -337,7 +372,7 @@
                 <div class="space-y-2"><label class="text-[10px] font-bold text-gray-400 uppercase">🛜 Koneksi Cloud</label><textarea id="firebase-config-input" class="w-full bg-gray-50 border rounded-xl p-3 text-[10px] font-mono h-20 outline-none focus:border-emerald-500" placeholder='{"apiKey": "AIza...", ...}'></textarea><button onclick="saveSettings()" class="w-full py-2 bg-blue-600 text-white rounded-lg font-bold text-xs">Simpan & Koneksikan</button></div><hr>
                 <div class="space-y-3">
                     <label class="text-[10px] font-bold text-gray-400 uppercase block">👥 Manajemen User (Suami/Istri)</label>
-                    <div class="flex gap-2 mb-2"><input type="text" id="new-user-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama (Angga/Veda)..."><select id="new-user-role" class="border px-2 py-1 rounded-lg text-xs bg-white text-gray-600 font-bold"><option value="Suami">Suami</option><option value="Istri">Istri</option></select><button onclick="addUser()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div>
+                    <div class="flex gap-2 mb-2"><input type="text" id="new-user-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama ..."><select id="new-user-role" class="border px-2 py-1 rounded-lg text-xs bg-white text-gray-600 font-bold"><option value="Suami">Suami</option><option value="Istri">Istri</option></select><button onclick="addUser()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div>
                     <div id="list-users-config" class="space-y-1"></div>
                 </div><hr>
                 <div class="space-y-3"><label class="text-[10px] font-bold text-gray-400 uppercase block">📈 Aset Investasi</label><div class="flex gap-2 mb-2"><input type="text" id="new-asset-name" class="flex-1 border px-2 py-1 rounded-lg text-xs" placeholder="Nama..."><button onclick="addAsset()" class="bg-indigo-500 text-white px-3 rounded-lg text-xs font-bold">+</button></div><div id="list-assets-config" class="space-y-1"></div></div><hr>
@@ -415,6 +450,17 @@
         localStorage.setItem('wa_dark_mode', document.body.classList.contains('dark-mode'));
     };
 
+    // --- SCROLL FUNCTIONS ---
+    window.scrollToBottom = () => { 
+        const el = document.getElementById('view-chat'); 
+        el.scrollTop = el.scrollHeight; 
+    };
+    
+    window.scrollToTop = () => { 
+        const el = document.getElementById('view-chat'); 
+        el.scrollTop = 0; 
+    };
+
     window.switchTab = (tab) => {
         ['chat', 'data', 'report', 'inquiry', 'plan'].forEach(v => {
             document.getElementById(`view-${v}`).classList.add('hidden');
@@ -423,7 +469,12 @@
         document.getElementById(`view-${tab}`).classList.remove('hidden');
         document.getElementById(`tab-${tab}`).className = 'flex-1 py-3 tab-active transition-all';
         document.getElementById('footer-chat').style.display = tab === 'chat' ? 'flex' : 'none';
-        if(tab === 'chat') { scrollToBottom(); } else { document.getElementById(`view-${tab}`).scrollTop = 0; }
+        if(tab === 'chat') { 
+            // Delay scroll to ensure content is rendered
+            setTimeout(scrollToBottom, 100); 
+        } else { 
+            document.getElementById(`view-${tab}`).scrollTop = 0; 
+        }
         if(tab === 'report') renderStats(); if(tab === 'inquiry') renderInquiry(); if(tab === 'plan') renderPlanning(); 
     };
 
@@ -570,7 +621,9 @@
         document.getElementById('active-wallet').value = 'Cash'; 
         // Reset Date input
         document.getElementById('tx-date').value = '';
-        scrollToBottom();
+        
+        // Auto scroll with delay
+        setTimeout(scrollToBottom, 100);
     };
 
     window.handleTransfer = async () => {
@@ -825,6 +878,11 @@
                 </div>`; 
             } 
         }); 
+        
+        // Auto Scroll after render complete
+        requestAnimationFrame(() => {
+            scrollToBottom();
+        });
     }
 
     window.renderDataList = () => { const container = document.getElementById('data-list-container'); container.innerHTML = ''; const search = document.getElementById('data-search').value.toLowerCase(), m = document.getElementById('data-filter-month').value, y = parseInt(document.getElementById('data-filter-year').value); const filtered = transactions.filter(t => { const d = new Date(t.ts); const matchYear = d.getFullYear() === y, matchMonth = m === 'all' ? true : d.getMonth() === parseInt(m), matchSearch = !search || t.label.toLowerCase().includes(search) || t.category.toLowerCase().includes(search); return matchYear && matchMonth && matchSearch; }); const grouped = {}; filtered.forEach(t => { const key = new Date(t.ts).toLocaleString('id-ID', { month: 'long', year: 'numeric' }); if(!grouped[key]) grouped[key] = []; grouped[key].push(t); }); Object.keys(grouped).sort((a,b) => new Date(grouped[b][0].ts) - new Date(grouped[a][0].ts)).forEach(key => { let html = `<div class="sticky top-0 bg-gray-100/95 p-2 px-4 text-[10px] font-bold text-gray-500 uppercase border-b border-gray-200 backdrop-blur-sm">${key}</div>`; grouped[key].slice().reverse().forEach(t => { const isTransfer = t.type === 'transfer', colorClass = t.type === 'income' ? 'text-emerald-600' : (isTransfer ? 'text-blue-600' : 'text-rose-600'), iconBg = t.type === 'income' ? 'bg-emerald-500' : (isTransfer ? 'bg-blue-500' : 'bg-rose-500'), icon = t.type === 'income' ? '↓' : (isTransfer ? '⇄' : '↑'), catLabel = isTransfer ? `${t.wallet} ➜ ${t.targetWallet}` : `${t.category} • ${t.wallet||'Cash'}`; html += `<div class="p-3 bg-white flex justify-between items-start hover:bg-gray-50 border-b border-gray-100"><div class="flex items-start gap-3"><div class="w-8 h-8 mt-1 rounded-full flex items-center justify-center text-white font-bold text-xs ${iconBg}">${icon}</div><div><div class="text-xs font-bold text-gray-800">${t.label}</div><div class="text-[10px] text-gray-400 mb-1">${new Date(t.ts).toLocaleDateString()} • ${catLabel}</div><div class="flex gap-3">${!isTransfer ? `<button onclick="openEditModal('${t.id}')" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1">✎ Edit</button>` : ''}<button onclick="deleteTx('${t.id}')" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1">🗑 Hapus</button></div></div></div><div class="text-right"><p class="text-sm font-bold ${colorClass}">Rp ${t.amount.toLocaleString()}</p><p class="text-[9px] text-gray-300 mt-1">${t.user}</p></div></div>`; }); container.innerHTML += html; }); };
