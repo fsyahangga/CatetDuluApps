@@ -191,7 +191,19 @@
 
         <main id="view-data" class="hidden absolute inset-0 bg-gray-50 pb-20 scroll-hide overflow-y-auto">
             <div class="sticky top-0 z-20 bg-white p-3 shadow-sm border-b border-gray-200">
-                <input type="text" id="data-search" oninput="renderDataList()" placeholder="🔍 Cari transaksi..." class="w-full bg-gray-100 border-none rounded-lg px-3 py-2 text-xs font-medium outline-none mb-2 focus:ring-1 focus:ring-emerald-500">
+                <div class="relative mb-2 flex gap-2">
+                    <div class="relative flex-1">
+                        <input type="text" id="data-search" oninput="renderDataList()" placeholder="🔍 Cari transaksi..." class="w-full bg-gray-100 border-none rounded-lg pl-3 pr-8 py-2 text-xs font-medium outline-none focus:ring-1 focus:ring-emerald-500">
+                        <button onclick="clearDataSearch()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 font-bold hidden" id="btn-clear-search">✕</button>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 mb-2">
+                    <select id="data-filter-category" onchange="renderDataList()" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600 truncate">
+                        <option value="all">📂 Semua Kategori</option>
+                    </select>
+                </div>
+
                 <div class="flex gap-2">
                     <select id="data-filter-month" onchange="renderDataList()" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none uppercase text-gray-600"><option value="all">Semua Bulan</option></select>
                     <select id="data-filter-year" onchange="renderDataList()" class="w-1/3 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600"></select>
@@ -749,6 +761,7 @@
         document.getElementById('list-chips-config').innerHTML = chips.map((c, index) => 
             `<span class="bg-gray-100 border px-2 py-1 rounded text-[10px] flex items-center gap-1 group">${c} <button onclick="deleteQuickChip(${index})" class="text-red-400 font-bold">×</button></span>`
         ).join('');
+        populateDataCategoryFilter();
     }
 
     // --- NEW: EDIT WALLET FUNCTION ---
@@ -885,8 +898,110 @@
         });
     }
 
-    window.renderDataList = () => { const container = document.getElementById('data-list-container'); container.innerHTML = ''; const search = document.getElementById('data-search').value.toLowerCase(), m = document.getElementById('data-filter-month').value, y = parseInt(document.getElementById('data-filter-year').value); const filtered = transactions.filter(t => { const d = new Date(t.ts); const matchYear = d.getFullYear() === y, matchMonth = m === 'all' ? true : d.getMonth() === parseInt(m), matchSearch = !search || t.label.toLowerCase().includes(search) || t.category.toLowerCase().includes(search); return matchYear && matchMonth && matchSearch; }); const grouped = {}; filtered.forEach(t => { const key = new Date(t.ts).toLocaleString('id-ID', { month: 'long', year: 'numeric' }); if(!grouped[key]) grouped[key] = []; grouped[key].push(t); }); Object.keys(grouped).sort((a,b) => new Date(grouped[b][0].ts) - new Date(grouped[a][0].ts)).forEach(key => { let html = `<div class="sticky top-0 bg-gray-100/95 p-2 px-4 text-[10px] font-bold text-gray-500 uppercase border-b border-gray-200 backdrop-blur-sm">${key}</div>`; grouped[key].slice().reverse().forEach(t => { const isTransfer = t.type === 'transfer', colorClass = t.type === 'income' ? 'text-emerald-600' : (isTransfer ? 'text-blue-600' : 'text-rose-600'), iconBg = t.type === 'income' ? 'bg-emerald-500' : (isTransfer ? 'bg-blue-500' : 'bg-rose-500'), icon = t.type === 'income' ? '↓' : (isTransfer ? '⇄' : '↑'), catLabel = isTransfer ? `${t.wallet} ➜ ${t.targetWallet}` : `${t.category} • ${t.wallet||'Cash'}`; html += `<div class="p-3 bg-white flex justify-between items-start hover:bg-gray-50 border-b border-gray-100"><div class="flex items-start gap-3"><div class="w-8 h-8 mt-1 rounded-full flex items-center justify-center text-white font-bold text-xs ${iconBg}">${icon}</div><div><div class="text-xs font-bold text-gray-800">${t.label}</div><div class="text-[10px] text-gray-400 mb-1">${new Date(t.ts).toLocaleDateString()} • ${catLabel}</div><div class="flex gap-3">${!isTransfer ? `<button onclick="openEditModal('${t.id}')" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1">✎ Edit</button>` : ''}<button onclick="deleteTx('${t.id}')" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1">🗑 Hapus</button></div></div></div><div class="text-right"><p class="text-sm font-bold ${colorClass}">Rp ${t.amount.toLocaleString()}</p><p class="text-[9px] text-gray-300 mt-1">${t.user}</p></div></div>`; }); container.innerHTML += html; }); };
-    function initDateFilters() { const sel = document.getElementById('filter-year'), mSel = document.getElementById('filter-month'), inqY = document.getElementById('inq-year'), inqM = document.getElementById('inq-month'), dataY = document.getElementById('data-filter-year'), dataM = document.getElementById('data-filter-month'); const cy = new Date().getFullYear(); let yOpt = ''; for(let i = cy; i >= cy - 2; i--) yOpt += `<option value="${i}">${i}</option>`; sel.innerHTML = yOpt; inqY.innerHTML = yOpt; dataY.innerHTML = yOpt; let mOpt = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map((m,i) => `<option value="${i}">${m}</option>`).join(''); mSel.innerHTML = mOpt; inqM.innerHTML = mOpt; dataM.insertAdjacentHTML('beforeend', mOpt); const cm = new Date().getMonth(); mSel.value = cm; inqM.value = cm; }
+    // --- FITUR BARU: POPULATE FILTER KATEGORI DI TAB DATA ---
+    window.populateDataCategoryFilter = () => {
+        const sel = document.getElementById('data-filter-category');
+        const currentVal = sel.value; // Simpan nilai saat ini agar tidak reset saat render ulang
+        
+        let opts = '<option value="all">📂 Semua Kategori</option>';
+        
+        // Group Pengeluaran
+        opts += '<optgroup label="Pengeluaran">';
+        config.categories.expense.forEach(c => opts += `<option value="${c}">${c}</option>`);
+        opts += '</optgroup>';
+
+        // Group Pemasukan
+        opts += '<optgroup label="Pemasukan">';
+        config.categories.income.forEach(c => opts += `<option value="${c}">${c}</option>`);
+        opts += '</optgroup>';
+
+        // Tambahan untuk Transfer/Lainnya jika perlu
+        opts += '<option value="Transfer">Transfer</option>';
+
+        sel.innerHTML = opts;
+        
+        // Kembalikan nilai jika masih ada, jika tidak default ke all
+        if(currentVal && [...sel.options].map(o => o.value).includes(currentVal)) {
+            sel.value = currentVal;
+        } else {
+            sel.value = 'all';
+        }
+    };
+
+    // --- FITUR BARU: CLEAR SEARCH & FILTER ---
+    window.clearDataSearch = () => {
+        document.getElementById('data-search').value = '';
+        document.getElementById('data-filter-category').value = 'all';
+        renderDataList();
+    };
+
+    window.renderDataList = () => { 
+        const container = document.getElementById('data-list-container'); 
+        container.innerHTML = ''; 
+        
+        const searchInput = document.getElementById('data-search');
+        const search = searchInput.value.toLowerCase();
+        
+        // Toggle tombol clear search (X)
+        const btnClear = document.getElementById('btn-clear-search');
+        if(search) btnClear.classList.remove('hidden'); else btnClear.classList.add('hidden');
+
+        const m = document.getElementById('data-filter-month').value;
+        const y = parseInt(document.getElementById('data-filter-year').value);
+        const catFilter = document.getElementById('data-filter-category').value; // Ambil nilai kategori
+
+        const filtered = transactions.filter(t => { 
+            const d = new Date(t.ts); 
+            const matchYear = d.getFullYear() === y;
+            const matchMonth = m === 'all' ? true : d.getMonth() === parseInt(m);
+            const matchSearch = !search || t.label.toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
+            
+            // Logika Filter Kategori Baru
+            const matchCat = catFilter === 'all' ? true : t.category === catFilter;
+
+            return matchYear && matchMonth && matchSearch && matchCat; 
+        }); 
+        
+        const grouped = {}; 
+        filtered.forEach(t => { 
+            const key = new Date(t.ts).toLocaleString('id-ID', { month: 'long', year: 'numeric' }); 
+            if(!grouped[key]) grouped[key] = []; 
+            grouped[key].push(t); 
+        }); 
+        
+        Object.keys(grouped).sort((a,b) => new Date(grouped[b][0].ts) - new Date(grouped[a][0].ts)).forEach(key => { 
+            let html = `<div class="sticky top-0 bg-gray-100/95 p-2 px-4 text-[10px] font-bold text-gray-500 uppercase border-b border-gray-200 backdrop-blur-sm z-10">${key}</div>`; 
+            grouped[key].slice().reverse().forEach(t => { 
+                const isTransfer = t.type === 'transfer', 
+                      colorClass = t.type === 'income' ? 'text-emerald-600' : (isTransfer ? 'text-blue-600' : 'text-rose-600'), 
+                      iconBg = t.type === 'income' ? 'bg-emerald-500' : (isTransfer ? 'bg-blue-500' : 'bg-rose-500'), 
+                      icon = t.type === 'income' ? '↓' : (isTransfer ? '⇄' : '↑'), 
+                      catLabel = isTransfer ? `${t.wallet} ➜ ${t.targetWallet}` : `${t.category} • ${t.wallet||'Cash'}`; 
+                
+                html += `<div class="p-3 bg-white flex justify-between items-start hover:bg-gray-50 border-b border-gray-100">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 mt-1 rounded-full flex items-center justify-center text-white font-bold text-xs ${iconBg} shrink-0">${icon}</div>
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-gray-800 truncate">${t.label}</div>
+                            <div class="text-[10px] text-gray-400 mb-1 truncate">${new Date(t.ts).toLocaleDateString()} • ${catLabel}</div>
+                            <div class="flex gap-3">
+                                ${!isTransfer ? `<button onclick="openEditModal('${t.id}')" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1">✎ Edit</button>` : ''}
+                                <button onclick="deleteTx('${t.id}')" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 flex items-center gap-1">🗑 Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0 ml-2">
+                        <p class="text-sm font-bold ${colorClass}">Rp ${t.amount.toLocaleString()}</p>
+                        <p class="text-[9px] text-gray-300 mt-1">${t.user}</p>
+                    </div>
+                </div>`; 
+            }); 
+            container.innerHTML += html; 
+        }); 
+        
+        if(filtered.length === 0) container.innerHTML = '<div class="p-10 text-center text-gray-400 text-xs">Tidak ada data ditemukan</div>';
+    };
+    function initDateFilters() { const sel = document.getElementById('filter-year'), mSel = document.getElementById('filter-month'), inqY = document.getElementById('inq-year'), inqM = document.getElementById('inq-month'), dataY = document.getElementById('data-filter-year'), dataM = document.getElementById('data-filter-month'); const cy = new Date().getFullYear(); let yOpt = ''; for(let i = cy; i >= cy - 2; i--) yOpt += `<option value="${i}">${i}</option>`; sel.innerHTML = yOpt; inqY.innerHTML = yOpt; dataY.innerHTML = yOpt; let mOpt = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map((m,i) => `<option value="${i}">${m}</option>`).join(''); mSel.innerHTML = mOpt; inqM.innerHTML = mOpt; dataM.insertAdjacentHTML('beforeend', mOpt); const cm = new Date().getMonth(); mSel.value = cm; inqM.value = cm; populateDataCategoryFilter();}
     function scrollToBottom() { setTimeout(() => { const el = document.getElementById('view-chat'); el.scrollTop = el.scrollHeight; }, 100); }
     function setupFirebase() { const configStr = localStorage.getItem('wa_firebase_config'); if (configStr) { try { const fbConfig = JSON.parse(configStr); const app = initializeApp(fbConfig); db = getFirestore(app); auth = getAuth(app); onAuthStateChanged(auth, (u) => { if (!u) signInAnonymously(auth); updateHeader(); const q = query(collection(db, COL_TX), orderBy('timestamp', 'asc')); onSnapshot(q, (sn) => { transactions = sn.docs.map(d => ({ id: d.id, ...d.data(), ts: d.data().timestamp?.toDate().toISOString() || new Date().toISOString() })); renderUI(); }); onSnapshot(doc(db, COL_DATA, DOC_CONFIG), (sn) => { if (sn.exists()) { config = sn.data(); localStorage.setItem('wa_config', JSON.stringify(config)); renderConfigList(); updateWalletSelects(); renderUI(); renderReminderList(); } }); }); } catch (e) { console.error(e); } } else { updateHeader(); } }
     window.saveSettings = () => { const val = document.getElementById('firebase-config-input').value.trim(); if (val) { try { JSON.parse(val); localStorage.setItem('wa_firebase_config', val); } catch { return alert("Format JSON Salah!"); } } else { localStorage.removeItem('wa_firebase_config'); } location.reload(); };
