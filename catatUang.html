@@ -33,7 +33,8 @@
         .tab-inactive { border-bottom: 3px solid transparent; color: rgba(255,255,255,0.7); }
         
         .wallet-scroll { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding-bottom: 2px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; width: 100%; }
-        .wallet-card { min-width: 95px; width: 95px; flex-shrink: 0; }
+        .wallet-card { min-width: 95px; width: 95px; flex-shrink: 0; cursor: pointer; transition: transform 0.1s; }
+        .wallet-card:active { transform: scale(0.95); }
         .prog-bg { background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden; }
         .prog-fill { height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out; }
 
@@ -132,6 +133,25 @@
             color: #e9edef !important;
             border-color: #2a3942 !important;
         }
+        /* --- TAMBAHAN: ALERT BUBBLE STYLE --- */
+        .bubble-alert { 
+            background-color: #fecaca; 
+            border: 1px solid #f87171; 
+            color: #991b1b; 
+            border-radius: 12px; 
+            padding: 8px 12px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            text-align: center; 
+            margin: 8px 0; 
+            width: 100%; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .dark-mode .bubble-alert {
+            background-color: #450a0a !important;
+            border-color: #7f1d1d !important;
+            color: #fca5a5 !important;
+        }
     </style>
 </head>
 <body>
@@ -198,15 +218,25 @@
                     </div>
                 </div>
                 
-                <div class="flex gap-2 mb-2">
-                    <select id="data-filter-category" onchange="renderDataList()" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600 truncate">
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <select id="data-filter-category" onchange="renderDataList()" class="bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600 truncate">
                         <option value="all">📂 Semua Kategori</option>
+                    </select>
+                    <select id="data-filter-wallet" onchange="renderDataList()" class="bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600 truncate">
+                        <option value="all">💳 Semua Wallet</option>
                     </select>
                 </div>
 
                 <div class="flex gap-2">
+                    <select id="data-filter-type" onchange="renderDataList()" class="w-24 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600">
+                        <option value="all">Semua Tipe</option>
+                        <option value="income">Pemasukan</option>
+                        <option value="expense">Pengeluaran</option>
+                        <option value="transfer">Transfer</option>
+                    </select>
+
                     <select id="data-filter-month" onchange="renderDataList()" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none uppercase text-gray-600"><option value="all">Semua Bulan</option></select>
-                    <select id="data-filter-year" onchange="renderDataList()" class="w-1/3 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600"></select>
+                    <select id="data-filter-year" onchange="renderDataList()" class="w-20 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-[10px] font-bold outline-none text-gray-600"></select>
                 </div>
             </div>
             <div id="data-list-container" class="divide-y divide-gray-200 pb-10"></div>
@@ -257,6 +287,7 @@
             <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">💵 Saldo Dompet/Rekening</h3>
                 <div id="inq-wallet-dashboard" class="wallet-scroll scroll-hide"></div>
+                <p class="text-[9px] text-center text-gray-400 mt-2 italic">*Klik kartu wallet untuk lihat mutasi</p>
             </div>
 
             <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
@@ -403,6 +434,24 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-mutation" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm flex flex-col max-h-[70vh] shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <div>
+                    <h3 id="mutation-title" class="font-bold text-lg text-slate-800">Mutasi Wallet</h3>
+                    <p class="text-[10px] text-gray-500">Riwayat transaksi wallet ini</p>
+                </div>
+                <button onclick="document.getElementById('modal-mutation').classList.add('hidden')" class="text-gray-400 text-2xl font-bold hover:text-gray-600 transition-colors">×</button>
+            </div>
+            <div id="mutation-list" class="flex-1 overflow-y-auto p-0 scroll-hide divide-y divide-gray-100">
+                </div>
+            <div class="p-3 bg-gray-50 text-center rounded-b-2xl border-t">
+                <button onclick="document.getElementById('modal-mutation').classList.add('hidden')" class="w-full py-2 bg-gray-200 text-gray-600 rounded-lg font-bold text-xs">Tutup</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script type="module">
@@ -414,6 +463,9 @@
     const COL_TX = 'transactions', COL_DATA = 'app_data', DOC_CONFIG = 'config';
     let transactions = JSON.parse(localStorage.getItem('wa_tx_data')) || [];
     
+    // --- GEMINI API KEY ---
+    const GEMINI_API_KEY = "AIzaSyBpS0_lUEe5ebkDWqFxNi1e5Zk-wgpfhBw";
+
     // --- 1.A DEFAULT QUICK CHIPS ---
     const defaultChips = ["🍜 Makan 20rb", "🍔 Jajan 10rb","🚬 Rokok 27rb", "⛽ Bensin 30rb", "🛒 Indomaret 100rb", "☕️ Kopi 15rb", "🍽️ Sarapan 15rb", "🛍️ Belanja 30rb"];
     
@@ -598,15 +650,75 @@
         return true;
     }
 
+    // --- LLM AI FUNCTION ---
+    async function classifyWithAI(text, config) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        
+        // Kita kirim daftar kategori agar AI konsisten
+        const expenseCats = config.categories.expense.join(", ");
+        const incomeCats = config.categories.income.join(", ");
+        const wallets = Object.keys(config.wallets).join(", ");
+
+        const prompt = `
+        Anda adalah asisten keuangan pribadi. Tugas anda adalah menganalisis teks transaksi berikut: "${text}".
+        
+        Konteks Aplikasi:
+        - Kategori Pengeluaran tersedia: [${expenseCats}]
+        - Kategori Pemasukan tersedia: [${incomeCats}]
+        - Wallet tersedia: [${wallets}]
+        
+        Instruksi:
+        1. Tentukan tipe transaksi: "income", "expense", atau "transfer".
+        2. Tentukan kategori yang paling cocok DARI DAFTAR DI ATAS. Jika tidak ada yang pas, pilih yang paling mendekati maknanya.
+        3. Ekstrak nominal uang (angka saja).
+        4. Buat label ringkas (maks 3-4 kata).
+        5. Jika user menyebutkan nama wallet yang ada di daftar, masukkan ke field "wallet". Jika tidak, biarkan null.
+        
+        Format Output WAJIB JSON murni tanpa markdown:
+        {
+          "type": "expense",
+          "category": "Makan",
+          "amount": 25000,
+          "label": "Nasi Padang",
+          "wallet": "Mandiri" (atau null)
+        }
+        `;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            const data = await response.json();
+            if(data.error) {
+                console.error("AI API Error:", data.error);
+                return null;
+            }
+            
+            const rawText = data.candidates[0].content.parts[0].text;
+            // Bersihkan formatting markdown json ```json ... ``` jika ada
+            const jsonText = rawText.replace(/```json|```/g, '').trim();
+            return JSON.parse(jsonText);
+
+        } catch (error) {
+            console.error("AI Network/Parse Error:", error);
+            return null; // Fallback ke manual jika error
+        }
+    }
+
+    // --- UPDATED SEND MESSAGE ---
     window.handleSendMessage = async () => {
         if(!validateUser()) return;
-        const input = document.getElementById('msg-input'); const raw = input.value.trim(); if (!raw) return;
-        
+        const input = document.getElementById('msg-input'); 
+        const raw = input.value.trim(); 
+        if (!raw) return;
+
         // --- 1.B BACKDATE LOGIC ---
         const dateInput = document.getElementById('tx-date').value;
-        // If date selected, use it. Else use current time.
-        // NOTE: New Date(dateInput) creates UTC, transactions usually store ISO. 
-        // Simple fix: append current time to backdate to avoid timezone offset issue showing wrong day.
         let timestamp;
         if(dateInput) {
             const now = new Date();
@@ -617,22 +729,70 @@
             timestamp = new Date().toISOString();
         }
 
-        let type = raw.startsWith('+') ? 'income' : 'expense', cleanText = raw.startsWith('+') ? raw.substring(1).trim() : raw, amount = 0, label = cleanText;
-        const match = cleanText.match(/(\d+[.,]?\d*)\s*(rb|k|jt|juta|ribu)?/i);
-        if (match) { let num = parseFloat(match[1].replace(',', '.')), suffix = match[2]?.toLowerCase(); if (['rb','k','ribu'].includes(suffix)) num *= 1000; if (['jt','juta'].includes(suffix)) num *= 1000000; amount = num; label = cleanText.replace(match[0], '').trim(); }
-        if (!label) label = type === 'income' ? 'Pemasukan' : 'Pengeluaran';
-        const wallet = document.getElementById('active-wallet').value;
-        const category = detectCategory(label, type, wallet);
-        
-        // Use custom timestamp here instead of serverTimestamp() for local logic, 
-        // for firebase we will handle it.
-        const txData = { user: currentUser, label, amount, type, category, wallet, customDate: timestamp };
+        // --- UI LOADING STATE ---
+        const originalPlaceholder = input.placeholder;
+        input.value = "";
+        input.placeholder = "🤖 AI sedang membaca...";
+        input.disabled = true;
+
+        let txData = {};
+
+        // --- 2. TRY AI CLASSIFICATION ---
+        const aiResult = await classifyWithAI(raw, config);
+
+        if (aiResult) {
+            // Jika AI sukses
+            const activeWallet = document.getElementById('active-wallet').value;
+            // Prioritaskan wallet dari AI jika valid, kalau tidak pakai dropdown
+            const finalWallet = (aiResult.wallet && config.wallets[aiResult.wallet]) ? aiResult.wallet : activeWallet;
+            
+            txData = {
+                user: currentUser,
+                label: aiResult.label || raw,
+                amount: aiResult.amount || 0,
+                type: aiResult.type || 'expense',
+                category: aiResult.category || 'Lainnya',
+                wallet: finalWallet,
+                customDate: timestamp
+            };
+        } else {
+            // --- 3. FALLBACK TO REGEX (MANUAL) ---
+            console.log("AI Failed/Offline, using Regex Fallback");
+            let type = raw.startsWith('+') ? 'income' : 'expense';
+            let cleanText = raw.startsWith('+') ? raw.substring(1).trim() : raw;
+            let amount = 0;
+            let label = cleanText;
+            
+            const match = cleanText.match(/(\d+[.,]?\d*)\s*(rb|k|jt|juta|ribu)?/i);
+            if (match) { 
+                let num = parseFloat(match[1].replace(',', '.'));
+                let suffix = match[2]?.toLowerCase(); 
+                if (['rb','k','ribu'].includes(suffix)) num *= 1000; 
+                if (['jt','juta'].includes(suffix)) num *= 1000000; 
+                amount = num; 
+                label = cleanText.replace(match[0], '').trim(); 
+            }
+            if (!label) label = type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+            const wallet = document.getElementById('active-wallet').value;
+            const category = detectCategory(label, type, wallet);
+
+            txData = { user: currentUser, label, amount, type, category, wallet, customDate: timestamp };
+        }
         
         await saveTransaction(txData); 
+        
+        // 2. --- UPDATE: CEK BURN RATE SETELAH SIMPAN ---
+        if (type === 'expense') {
+            await checkBurnRate(category, wallet);
+        }
+
+        // --- RESET UI ---
         input.value = ''; 
+        input.placeholder = originalPlaceholder;
+        input.disabled = false;
+        input.focus();
         document.getElementById('active-wallet').value = 'Cash'; 
-        // Reset Date input
-        document.getElementById('tx-date').value = '';
+        document.getElementById('tx-date').value = ''; // Reset Date
         
         // Auto scroll with delay
         setTimeout(scrollToBottom, 100);
@@ -717,8 +877,10 @@
         const m = parseInt(document.getElementById('inq-month').value), y = parseInt(document.getElementById('inq-year').value);
         let walletBals = { ...config.wallets };
         transactions.forEach(t => { const amt = Number(t.amount) || 0, w = t.wallet || 'Cash'; if(!walletBals[w]) walletBals[w] = 0; if (t.type === 'income') walletBals[w] += amt; else if (t.type === 'expense') walletBals[w] -= amt; else if (t.type === 'transfer') { walletBals[w] -= amt; const target = t.targetWallet || 'Cash'; if(!walletBals[target]) walletBals[target] = 0; walletBals[target] += amt; } });
+        
+        // FITUR BARU: Add onclick to show wallet mutation
         document.getElementById('inq-wallet-dashboard').innerHTML = Object.entries(walletBals).map(([name, bal]) => `
-            <div class="wallet-card bg-slate-800 p-2 rounded-xl text-white shadow-sm flex flex-col justify-center h-16 relative overflow-hidden">
+            <div onclick="showWalletMutation('${name}')" class="wallet-card bg-slate-800 p-2 rounded-xl text-white shadow-sm flex flex-col justify-center h-16 relative overflow-hidden">
                 <div class="absolute -right-2 -top-2 w-8 h-8 bg-white/5 rounded-full blur-xl"></div>
                 <p class="text-[9px] text-slate-400 font-bold uppercase truncate">${name}</p>
                 <p class="text-xs font-bold truncate mt-0.5">Rp ${bal.toLocaleString()}</p>
@@ -732,6 +894,49 @@
         let billTotal = filtered.reduce((a,b) => a + b.amount, 0);
         document.getElementById('inq-bill-total').innerText = `Total: Rp ${billTotal.toLocaleString()}`;
         document.getElementById('inq-bill-list').innerHTML = filtered.length ? filtered.map(t => `<div class="flex justify-between items-center p-3 hover:bg-blue-50"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p></div><p class="text-xs font-black text-blue-600">Rp ${t.amount.toLocaleString()}</p></div>`).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan.</p>`;
+    };
+
+    // --- FITUR BARU: LOGIC MODAL MUTASI WALLET ---
+    window.showWalletMutation = (walletName) => {
+        const modal = document.getElementById('modal-mutation');
+        const listContainer = document.getElementById('mutation-list');
+        document.getElementById('mutation-title').innerText = `Mutasi: ${walletName}`;
+        
+        // Filter transaksi yang melibatkan wallet ini
+        const history = transactions.filter(t => t.wallet === walletName || t.targetWallet === walletName);
+        
+        // Sort descending (terbaru diatas)
+        history.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+        
+        if(history.length === 0) {
+            listContainer.innerHTML = '<p class="text-center p-5 text-gray-400 text-xs italic">Belum ada transaksi.</p>';
+        } else {
+            listContainer.innerHTML = history.map(t => {
+                const isIncoming = (t.type === 'income') || (t.type === 'transfer' && t.targetWallet === walletName);
+                const isExpense = (t.type === 'expense') || (t.type === 'transfer' && t.wallet === walletName);
+                
+                let color = isIncoming ? 'text-emerald-600' : 'text-rose-600';
+                let sign = isIncoming ? '+' : '-';
+                let desc = t.label;
+                
+                if(t.type === 'transfer') {
+                    color = isIncoming ? 'text-blue-600' : 'text-orange-500';
+                    if(isIncoming) desc = `Transfer dari ${t.wallet} (${t.label})`;
+                    else desc = `Transfer ke ${t.targetWallet} (${t.label})`;
+                }
+
+                return `
+                <div class="p-3 hover:bg-gray-50 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-gray-700">${desc}</p>
+                        <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} ${new Date(t.ts).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} • ${t.user}</p>
+                    </div>
+                    <span class="text-xs font-bold ${color}">${sign} Rp ${t.amount.toLocaleString()}</span>
+                </div>`;
+            }).join('');
+        }
+        
+        modal.classList.remove('hidden');
     };
 
     function renderConfigList() {
@@ -851,6 +1056,8 @@
         // --- STICKY REMINDER (Render di container terpisah agar tidak scroll bersama chat) ---
         const stickyContainer = document.getElementById('sticky-reminder-container');
         stickyContainer.innerHTML = '';
+        // 1. Masukkan Alert Budget (Merah/Oranye) Paling Atas
+        stickyContainer.innerHTML += getBudgetAlertHTML();
 
         if(config.reminders && config.reminders.length > 0) {
             const today = new Date(); today.setHours(0,0,0,0);
@@ -862,7 +1069,7 @@
                 }
             });
         }
-
+        
         transactions.forEach(t => { 
             const isMe = t.user === currentUser; 
             if(t.type === 'transfer') { 
@@ -875,8 +1082,23 @@
                         ${isMe ? `<button onclick="deleteTx('${t.id}')" class="ml-2 text-red-400 font-bold">×</button>` : ''}
                     </div>
                 </div>`; 
-            } else { 
+            } 
+            // 2. --- UPDATE: Handle Alert (BUBBLE MERAH) ---
+            else if (t.type === 'alert') {
+                 list.innerHTML += `
+                <div class="flex justify-center w-full px-4 animate-bounce">
+                    <div class="bubble-alert">
+                        ${t.label}
+                        <button onclick="deleteTx('${t.id}')" class="ml-2 text-red-800 font-bold border border-red-300 rounded px-1 text-[9px]">✕</button>
+                    </div>
+                </div>`;
+            }
+            else { 
                 const amountColor = t.type === 'income' ? 'text-inc' : 'text-exp';
+                // FITUR BARU: Add Date to Chat Bubble
+                const txDate = new Date(t.ts).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                const txTime = new Date(t.ts).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+                
                 list.innerHTML += `
                 <div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full">
                     <div class="bubble ${isMe ? 'bubble-me' : 'bubble-other'}">
@@ -886,7 +1108,7 @@
                         </div>
                         <div class="bubble-content font-medium">${t.label}</div>
                         <div class="bubble-amount ${amountColor}">Rp ${Number(t.amount).toLocaleString()}</div>
-                        <div class="bubble-footer">${t.user} • ${new Date(t.ts).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div>
+                        <div class="bubble-footer">${t.user} • ${txDate} ${txTime}</div>
                     </div>
                 </div>`; 
             } 
@@ -901,37 +1123,35 @@
     // --- FITUR BARU: POPULATE FILTER KATEGORI DI TAB DATA ---
     window.populateDataCategoryFilter = () => {
         const sel = document.getElementById('data-filter-category');
-        const currentVal = sel.value; // Simpan nilai saat ini agar tidak reset saat render ulang
+        const walletSel = document.getElementById('data-filter-wallet'); // FITUR BARU
+        const currentVal = sel.value; 
+        const currentWalletVal = walletSel.value;
         
+        // --- Populate Category ---
         let opts = '<option value="all">📂 Semua Kategori</option>';
-        
-        // Group Pengeluaran
         opts += '<optgroup label="Pengeluaran">';
         config.categories.expense.forEach(c => opts += `<option value="${c}">${c}</option>`);
         opts += '</optgroup>';
-
-        // Group Pemasukan
         opts += '<optgroup label="Pemasukan">';
         config.categories.income.forEach(c => opts += `<option value="${c}">${c}</option>`);
         opts += '</optgroup>';
-
-        // Tambahan untuk Transfer/Lainnya jika perlu
         opts += '<option value="Transfer">Transfer</option>';
-
         sel.innerHTML = opts;
-        
-        // Kembalikan nilai jika masih ada, jika tidak default ke all
-        if(currentVal && [...sel.options].map(o => o.value).includes(currentVal)) {
-            sel.value = currentVal;
-        } else {
-            sel.value = 'all';
-        }
+        if(currentVal && [...sel.options].map(o => o.value).includes(currentVal)) { sel.value = currentVal; } else { sel.value = 'all'; }
+
+        // --- Populate Wallet Filter (FITUR BARU) ---
+        let wOpts = '<option value="all">💳 Semua Wallet</option>';
+        Object.keys(config.wallets).forEach(w => wOpts += `<option value="${w}">${w}</option>`);
+        walletSel.innerHTML = wOpts;
+        if(currentWalletVal && Object.keys(config.wallets).includes(currentWalletVal)) { walletSel.value = currentWalletVal; } else { walletSel.value = 'all'; }
     };
 
     // --- FITUR BARU: CLEAR SEARCH & FILTER ---
     window.clearDataSearch = () => {
         document.getElementById('data-search').value = '';
         document.getElementById('data-filter-category').value = 'all';
+        document.getElementById('data-filter-wallet').value = 'all'; // Reset Wallet
+        document.getElementById('data-filter-type').value = 'all'; // Reset Type
         renderDataList();
     };
 
@@ -948,18 +1168,27 @@
 
         const m = document.getElementById('data-filter-month').value;
         const y = parseInt(document.getElementById('data-filter-year').value);
-        const catFilter = document.getElementById('data-filter-category').value; // Ambil nilai kategori
+        const catFilter = document.getElementById('data-filter-category').value; 
+        
+        // FITUR BARU: Ambil nilai filter Wallet & Type
+        const walletFilter = document.getElementById('data-filter-wallet').value;
+        const typeFilter = document.getElementById('data-filter-type').value;
 
         const filtered = transactions.filter(t => { 
             const d = new Date(t.ts); 
             const matchYear = d.getFullYear() === y;
             const matchMonth = m === 'all' ? true : d.getMonth() === parseInt(m);
             const matchSearch = !search || t.label.toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
-            
-            // Logika Filter Kategori Baru
             const matchCat = catFilter === 'all' ? true : t.category === catFilter;
+            
+            // FITUR BARU: Logic Filter Wallet
+            // Jika transfer, cek wallet asal atau tujuan
+            const matchWallet = walletFilter === 'all' ? true : (t.wallet === walletFilter || (t.type === 'transfer' && t.targetWallet === walletFilter));
+            
+            // FITUR BARU: Logic Filter Type
+            const matchType = typeFilter === 'all' ? true : t.type === typeFilter;
 
-            return matchYear && matchMonth && matchSearch && matchCat; 
+            return matchYear && matchMonth && matchSearch && matchCat && matchWallet && matchType; 
         }); 
         
         const grouped = {}; 
@@ -1006,6 +1235,142 @@
     function setupFirebase() { const configStr = localStorage.getItem('wa_firebase_config'); if (configStr) { try { const fbConfig = JSON.parse(configStr); const app = initializeApp(fbConfig); db = getFirestore(app); auth = getAuth(app); onAuthStateChanged(auth, (u) => { if (!u) signInAnonymously(auth); updateHeader(); const q = query(collection(db, COL_TX), orderBy('timestamp', 'asc')); onSnapshot(q, (sn) => { transactions = sn.docs.map(d => ({ id: d.id, ...d.data(), ts: d.data().timestamp?.toDate().toISOString() || new Date().toISOString() })); renderUI(); }); onSnapshot(doc(db, COL_DATA, DOC_CONFIG), (sn) => { if (sn.exists()) { config = sn.data(); localStorage.setItem('wa_config', JSON.stringify(config)); renderConfigList(); updateWalletSelects(); renderUI(); renderReminderList(); } }); }); } catch (e) { console.error(e); } } else { updateHeader(); } }
     window.saveSettings = () => { const val = document.getElementById('firebase-config-input').value.trim(); if (val) { try { JSON.parse(val); localStorage.setItem('wa_firebase_config', val); } catch { return alert("Format JSON Salah!"); } } else { localStorage.removeItem('wa_firebase_config'); } location.reload(); };
     window.exportData = () => { const csv = "Tanggal,Jam,User,Tipe,Kategori,Wallet,Target,Label,Nominal\n" + transactions.map(t => { const d = new Date(t.ts); return `${d.toLocaleDateString()},${d.toLocaleTimeString()},${t.user},${t.type},${t.category},${t.wallet||''},${t.targetWallet||''},"${t.label}",${t.amount}`; }).join("\n"); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'Laporan.csv'; a.click(); };
+    
+    // 1. HAPUS index.html DARI URL (Visual Only)
+    // Ini membuat tampilan URL lebih bersih (misal: domain.com/index.html menjadi domain.com/)
+    if (window.location.pathname.endsWith('index.html')) {
+        const newPath = window.location.pathname.replace(/index\.html$/, '');
+        window.history.replaceState(null, '', newPath + window.location.search);
+    }
+
+    // 2. DISABLE KLIK KANAN (Context Menu)
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 3. DISABLE SHORTCUT DEVELOPER (F12, Ctrl+U, Ctrl+Shift+I, dll)
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Ctrl+Shift+I (Inspect), Ctrl+Shift+J (Console), Ctrl+Shift+C (Element)
+        if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    // --- FITUR BARU: BURN RATE CHECKER ---
+    async function checkBurnRate(category, wallet) {
+        // 1. Cek apakah ada budget untuk kategori ini
+        const budgetLimit = config.budgets ? config.budgets[category] : 0;
+        if (!budgetLimit || budgetLimit <= 0) return;
+
+        // 2. Hitung total pengeluaran bulan ini untuk kategori tsb
+        const now = new Date();
+        const m = now.getMonth();
+        const y = now.getFullYear();
+
+        const currentUsage = transactions.reduce((acc, t) => {
+            const d = new Date(t.ts);
+            if (t.type === 'expense' && t.category === category && d.getMonth() === m && d.getFullYear() === y) {
+                return acc + Number(t.amount);
+            }
+            return acc;
+        }, 0);
+
+        // 3. Hitung Persentase
+        const percentage = (currentUsage / budgetLimit) * 100;
+
+        // 4. Trigger Alert jika tembus 75%
+        // Logic tambahan: Kita cek apakah alert terakhir untuk kategori ini sudah muncul hari ini agar tidak spamming setiap detik
+        // Tapi untuk MVP, kita trigger saja setiap kali lewat threshold agar user 'aware'.
+        
+        if (percentage >= 75) {
+            const msg = percentage >= 100 
+                ? `🚨 OVER BUDGET! ${category} sudah ${percentage.toFixed(0)}% (Rp ${currentUsage.toLocaleString()})`
+                : `⚠️ WARNING: ${category} mencapai ${percentage.toFixed(0)}% dari limit!`;
+
+            // Simpan sebagai transaksi tipe 'alert' (tidak mempengaruhi saldo, hanya visual)
+            const alertData = {
+                user: 'System',
+                label: msg,
+                amount: 0,
+                type: 'alert', // Tipe baru
+                category: 'System',
+                wallet: wallet, // Tempel ke wallet aktif visualnya
+                customDate: new Date().toISOString()
+            };
+            
+            // Kita save langsung tanpa validasi user
+            await saveTransaction(alertData);
+        }
+    }
+    // --- FITUR BARU: STICKY BUDGET ALERT (Real-time Current Month) ---
+    function getBudgetAlertHTML() {
+        if (!config.budgets) return '';
+        
+        // 1. Ambil Waktu Sekarang (System Time)
+        const now = new Date();
+        const m = now.getMonth(); 
+        const y = now.getFullYear();
+        const monthName = now.toLocaleString('id-ID', { month: 'long' });
+
+        let html = '';
+
+        Object.entries(config.budgets).forEach(([cat, limit]) => {
+            // 2. Hitung total pengeluaran kategori tersebut di bulan INI
+            const used = transactions.reduce((acc, t) => {
+                // Pastikan ada timestamp
+                if (!t.ts) return acc;
+                
+                const d = new Date(t.ts);
+                if (t.type === 'expense' && t.category === cat && d.getMonth() === m && d.getFullYear() === y) {
+                    return acc + Number(t.amount);
+                }
+                return acc;
+            }, 0);
+
+            // 3. Cek Persentase
+            const pct = (used / limit) * 100;
+            
+            // 4. Render Alert jika >= 75% (Langsung Merah)
+            if (pct >= 75) {
+                // Styling Merah (Rose) untuk semua yang di atas 75%
+                const bgClass = 'bg-rose-100 border-rose-300';
+                const textClass = 'text-rose-800';
+                const barClass = 'bg-rose-500';
+                const icon = pct >= 100 ? '🚨' : '⚠️';
+                const status = pct >= 100 ? 'OVER BUDGET!' : 'BUDGET KRITIS!';
+
+                html += `
+                <div class="bubble-system px-4 py-2 w-full mb-2 ${bgClass} !border-l-4 !text-left shadow-sm relative overflow-hidden group animate-pulse">
+                    <div class="flex justify-between items-center mb-1 relative z-10">
+                        <span class="font-black text-xs uppercase flex items-center gap-1 ${textClass}">
+                            ${icon} ${cat} (${monthName})
+                        </span>
+                        <span class="font-black text-xs ${textClass}">${pct.toFixed(0)}%</span>
+                    </div>
+                    <div class="w-full bg-white/50 h-1.5 rounded-full overflow-hidden relative z-10">
+                        <div class="h-full ${barClass} transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
+                    </div>
+                    <div class="flex justify-between items-end mt-1 relative z-10">
+                        <span class="text-[9px] font-bold ${textClass} opacity-80">${status}</span>
+                        <p class="text-[10px] ${textClass} font-mono font-bold">
+                            Rp ${used.toLocaleString()} <span class="opacity-60 font-normal">/ ${limit.toLocaleString()}</span>
+                        </p>
+                    </div>
+                </div>`;
+            }
+        });
+        return html;
+    }
 </script>
 </body>
 </html>
