@@ -719,9 +719,11 @@
         const yVal = document.getElementById('filter-year').value;
         if (mVal === "" || yVal === "") return;
         const m = parseInt(mVal); const y = parseInt(yVal);
+        
         const filtered = transactions.filter(t => { const d = new Date(t.ts); return d.getMonth() === m && d.getFullYear() === y; });
         let inc = 0, exp = 0, cats = {}, userExp = {};
         let billTotal = 0; let billItems = [];
+        
         filtered.forEach(t => { 
             const amt = Number(t.amount) || 0;
             if(t.type === 'income') { inc += amt; } 
@@ -731,15 +733,71 @@
                 if (catName.includes('tagihan') || labelName.includes('tagihan')) { billTotal += amt; billItems.push(t); }
             } 
         });
-        document.getElementById('total-income').innerText = `Rp ${inc.toLocaleString()}`; document.getElementById('total-expense').innerText = `Rp ${exp.toLocaleString()}`; document.getElementById('total-balance').innerText = `Rp ${(inc-exp).toLocaleString()}`;
+
+        // Update Angka di UI
+        document.getElementById('total-income').innerText = `Rp ${inc.toLocaleString()}`; 
+        document.getElementById('total-expense').innerText = `Rp ${exp.toLocaleString()}`; 
+        document.getElementById('total-balance').innerText = `Rp ${(inc-exp).toLocaleString()}`;
         document.getElementById('bill-total').innerText = `Rp ${billTotal.toLocaleString()}`;
+
+        // Logic Onclick Income & Expense Box
+        const incomeBox = document.getElementById('total-income').parentElement;
+        const expenseBox = document.getElementById('total-expense').parentElement;
+
+        incomeBox.onclick = () => showMutasiByCategory('SEMUA', 'income');
+        incomeBox.className = "bg-emerald-50 p-3 rounded-2xl border border-emerald-100 cursor-pointer hover:bg-emerald-100 active:scale-95 transition-transform";
+        
+        expenseBox.onclick = () => showMutasiByCategory('SEMUA', 'expense');
+        expenseBox.className = "bg-rose-50 p-3 rounded-2xl border border-rose-100 cursor-pointer hover:bg-rose-100 active:scale-95 transition-transform";
+
         document.getElementById('bill-list').innerHTML = billItems.length ? billItems.map(t => `<div class="flex justify-between items-center p-3 hover:bg-gray-50"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()}</p></div><p class="text-xs font-black text-rose-600">Rp ${Number(t.amount).toLocaleString()}</p></div>`).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan.</p>`;
 
-        if(!document.getElementById('view-report').classList.contains('hidden')) { if(chartInstances.pie) chartInstances.pie.destroy(); if(chartInstances.userPie) chartInstances.userPie.destroy(); const pieCtx = document.getElementById('pieChart').getContext('2d'); chartInstances.pie = new Chart(pieCtx, { type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); 
-        
-        const userCtx = document.getElementById('userChart').getContext('2d'); chartInstances.userPie = new Chart(userCtx, { type: 'pie', data: { labels: Object.keys(userExp), datasets: [{ data: Object.values(userExp), backgroundColor: ['#3b82f6', '#ec4899', '#f97316'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); }
-    };
+        // Chart Logic (Pie Chart & User Chart)
+        if(!document.getElementById('view-report').classList.contains('hidden')) { 
+            // --- PERBAIKAN DI SINI (Memindahkan List ke Luar Wrapper Chart) ---
+            
+            // 1. Ambil elemen Canvas
+            const pieCanvas = document.getElementById('pieChart');
+            // 2. Ambil Parent Canvas (div h-48 yang tingginya terbatas)
+            const canvasWrapper = pieCanvas.parentElement;
+            // 3. Ambil Kakek Canvas (Container Kartu Putih Utama) -> Kita taruh list di sini
+            const cardContainer = canvasWrapper.parentElement; 
+            
+            // Bersihkan list lama kalau ada
+            const oldList = document.getElementById('clickable-cat-list');
+            if(oldList) oldList.remove();
 
+            // Buat container list baru
+            const listDiv = document.createElement('div');
+            listDiv.id = 'clickable-cat-list';
+            listDiv.className = 'mt-6 grid grid-cols-1 gap-2 border-t pt-4 pb-2'; // Kasih margin top biar gak nabrak
+            
+            let listIsi = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">Rincian Pengeluaran</p>';
+            Object.entries(cats).sort((a,b) => b[1] - a[1]).forEach(([namaCat, total]) => {
+                listIsi += `
+                <div onclick="showMutasiByCategory('${namaCat}', 'expense')" class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl cursor-pointer hover:bg-rose-50 active:scale-95 transition-transform shadow-sm">
+                    <span class="text-xs font-bold text-slate-700">${namaCat}</span>
+                    <span class="text-xs font-bold text-rose-600">Rp ${total.toLocaleString()}</span>
+                </div>`;
+            });
+            listDiv.innerHTML = listIsi;
+            
+            // Masukkan list ke dalam CARD CONTAINER (bukan canvas wrapper)
+            cardContainer.appendChild(listDiv);
+
+            // ------------------------------------------------------------------
+
+            // Render Chart JS
+            if(chartInstances.pie) chartInstances.pie.destroy(); 
+            if(chartInstances.userPie) chartInstances.userPie.destroy(); 
+            
+            const pieCtx = document.getElementById('pieChart').getContext('2d'); 
+            chartInstances.pie = new Chart(pieCtx, { type: 'doughnut', data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); 
+            
+            const userCtx = document.getElementById('userChart').getContext('2d'); 
+            chartInstances.userPie = new Chart(userCtx, { type: 'pie', data: { labels: Object.keys(userExp), datasets: [{ data: Object.values(userExp), backgroundColor: ['#3b82f6', '#ec4899', '#f97316'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 9} } } } } }); 
+        }
+    };
     window.renderPlanning = () => {
         // 1. Hitung Penggunaan Budget Bulan Ini
         const currentDate = new Date();
@@ -901,47 +959,52 @@
     window.deleteTx = async (id) => { if(confirm("Hapus?")) { if(db && id.length>8) await deleteDoc(doc(db, COL_TX, id)); else { transactions=transactions.filter(t=>t.id!=id); localStorage.setItem('wa_tx_data',JSON.stringify(transactions)); renderUI(); } } };
     // Fungsi untuk membuka modal dan filter data
     // --- 1. LOGIC MODAL MUTASI (Tempel di paling bawah script) ---
+    // --- 1. UPDATE LOGIC MODAL (Supaya bisa baca 'SEMUA') ---
     window.showMutasiByCategory = (categoryName, type) => {
         const modal = document.getElementById('modalMutasi');
         const content = document.getElementById('modalContent');
         const title = document.getElementById('modalTitle');
         
-        // Ambil bulan & tahun yang sedang dipilih di tab Laporan
+        // Ambil bulan & tahun yang sedang dipilih
         const m = parseInt(document.getElementById('filter-month').value);
         const y = parseInt(document.getElementById('filter-year').value);
 
-        title.innerText = `Mutasi: ${categoryName}`;
+        // Atur Judul Modal
+        if (categoryName === 'SEMUA') {
+            title.innerText = `Mutasi: SEMUA ${type === 'income' ? 'PEMASUKAN' : 'PENGELUARAN'}`;
+        } else {
+            title.innerText = `Mutasi: ${categoryName}`;
+        }
+        
         content.innerHTML = '<p class="text-center text-gray-400">Memuat...</p>';
         modal.classList.remove('hidden');
 
-        // Cari transaksi yang cocok
+        // Filter Transaksi
         const filtered = transactions.filter(t => {
             const d = new Date(t.ts);
-            // Cek Bulan & Tahun sama dengan filter
             const matchDate = d.getMonth() === m && d.getFullYear() === y;
-            // Cek Kategori sama
-            const matchCat = t.category === categoryName;
-            // Cek Tipe (Income/Expense)
+            // Kuncinya disini: Kalau 'SEMUA', kategori apapun dianggap benar
+            const matchCat = (categoryName === 'SEMUA') ? true : t.category === categoryName; 
             const matchType = (type === 'all' || t.type === type);
             return matchDate && matchCat && matchType;
-        }).sort((a,b) => new Date(b.ts) - new Date(a.ts)); // Urutkan dari yang terbaru
+        }).sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
         if(filtered.length === 0) {
             content.innerHTML = '<p class="text-center text-gray-400 py-10 italic">Tidak ada transaksi bulan ini.</p>';
             return;
         }
 
-        // Bikin list tampilan
         content.innerHTML = filtered.map(t => `
             <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
                 <div>
                     <p class="font-bold text-sm text-gray-700">${t.label}</p>
-                    <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p>
+                    <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.category}</p>
                 </div>
                 <div class="text-right">
                     <p class="font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
                         ${Number(t.amount).toLocaleString('id-ID')}
                     </p>
+                    <p class="text-[9px] text-gray-400 italic">${t.wallet}</p>
                 </div>
             </div>
         `).join('');
