@@ -251,10 +251,28 @@
                     <select id="inq-year" onchange="renderInquiry()" class="w-1/3 bg-blue-50 border-none rounded-lg p-2 text-xs font-bold text-blue-800 outline-none"></select>
                 </div>
             </div>
-            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 rounded-3xl shadow-lg text-center text-white">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 rounded-3xl shadow-lg text-center text-white relative">
                 <p class="text-[10px] font-bold uppercase tracking-[0.25em] opacity-80">💸 NET WORTH</p>
                 <h2 id="total-wealth" class="text-3xl font-black my-2">Rp 0</h2>
-                <p class="text-[9px] opacity-70">💰 (Cash + Aset)</p>
+                <div class="flex justify-center items-center gap-2">
+                    <p class="text-[9px] opacity-70">💰 (Cash + Aset)</p>
+                    <button onclick="saveNetWorthSnapshot()" class="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded text-[9px] font-bold border border-white/20 transition-colors">📸 Simpan Data</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">🍰 Komposisi Aset</h3>
+                    <div class="relative h-48 w-full">
+                        <canvas id="inqPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">📈 Tren Net Worth (6 Bulan)</h3>
+                    <div class="relative h-48 w-full">
+                        <canvas id="inqLineChart"></canvas>
+                    </div>
+                </div>
             </div>
             <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
                 <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">👛 Saldo Wallet</h3>
@@ -650,46 +668,245 @@
         const yVal = document.getElementById('inq-year').value;
         if (mVal === "" || yVal === "") return;
         const m = parseInt(mVal); const y = parseInt(yVal);
-        let walletBals = { ...config.wallets };
-        transactions.forEach(t => { const amt = Number(t.amount) || 0, w = t.wallet || 'Cash'; if(!walletBals[w]) walletBals[w] = 0; if (t.type === 'income') walletBals[w] += amt; else if (t.type === 'expense') walletBals[w] -= amt; else if (t.type === 'transfer') { walletBals[w] -= amt; const target = t.targetWallet || 'Cash'; if(!walletBals[target]) walletBals[target] = 0; walletBals[target] += amt; } });
         
-        document.getElementById('inq-wallet-dashboard').innerHTML = Object.entries(walletBals).map(([name, bal]) => `<div onclick="showWalletMutation('${name}')" class="wallet-card bg-slate-800 p-2 rounded-xl text-white shadow-sm flex flex-col justify-center h-16 relative overflow-hidden"><div class="absolute -right-2 -top-2 w-8 h-8 bg-white/5 rounded-full blur-xl"></div><p class="text-[9px] text-slate-400 font-bold uppercase truncate">${name}</p><p class="text-xs font-bold truncate mt-0.5">Rp ${bal.toLocaleString()}</p></div>`).join('');
+        // --- 1. PERBAIKAN LOGIC SALDO WALLET ---
+        // Ambil Saldo Awal
+        let walletBals = { ...config.wallets };
 
-        let totalAssets = 0; const assets = config.assets || {};
-        document.getElementById('asset-list-display').innerHTML = Object.keys(assets).length ? Object.entries(assets).map(([name, val]) => { totalAssets += val; return `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-xl border border-gray-100"><span class="text-xs font-bold text-slate-700">${name}</span><div class="flex items-center gap-2"><span class="text-xs font-bold text-emerald-600">Rp ${val.toLocaleString()}</span><button onclick="updateAssetValue('${name}')" class="text-[10px] text-blue-500 bg-blue-50 px-2 py-1 rounded">Update</button></div></div>`; }).join('') : `<p class="text-center text-[10px] text-gray-400 py-2">Belum ada aset.</p>`;
+        // Hitung Pergerakan Saldo berdasarkan Transaksi
+        transactions.forEach(t => { 
+            const amt = Number(t.amount) || 0;
+            const w = t.wallet || 'Cash'; 
+            
+            // Pastikan wallet ada di object perhitungan
+            if(typeof walletBals[w] === 'undefined') walletBals[w] = 0; 
+            
+            if (t.type === 'income') {
+                walletBals[w] += amt; 
+            } else if (t.type === 'expense') {
+                walletBals[w] -= amt; 
+            } else if (t.type === 'transfer') { 
+                walletBals[w] -= amt; 
+                const target = t.targetWallet || 'Cash'; 
+                if(typeof walletBals[target] === 'undefined') walletBals[target] = 0; 
+                walletBals[target] += amt; 
+            } 
+        });
+
+        // Hitung Total Cash dari hasil perhitungan di atas
+        const totalCash = Object.values(walletBals).reduce((a, b) => a + b, 0);
+
+        // Render Dashboard Wallet (Pakai walletBals yang sudah dihitung, BUKAN config.wallets)
+        document.getElementById('inq-wallet-dashboard').innerHTML = Object.entries(walletBals).map(([name, bal]) => 
+            `<div onclick="showWalletMutation('${name}')" class="wallet-card bg-slate-800 p-2 rounded-xl text-white shadow-sm flex flex-col justify-center h-16 relative overflow-hidden group cursor-pointer transition-transform active:scale-95">
+                <div class="absolute -right-2 -top-2 w-8 h-8 bg-white/5 rounded-full blur-xl group-hover:bg-white/10"></div>
+                <p class="text-[9px] text-slate-400 font-bold uppercase truncate">${name}</p>
+                <p class="text-xs font-bold truncate mt-0.5">Rp ${bal.toLocaleString()}</p>
+            </div>`
+        ).join('');
+
+        // 2. Hitung Aset (Sama seperti sebelumnya)
+        let totalAssets = 0; 
+        const assets = config.assets || {};
+        const assetEntries = Object.entries(assets);
+        
+        document.getElementById('asset-list-display').innerHTML = assetEntries.length ? assetEntries.map(([name, val]) => { 
+            totalAssets += val; 
+            return `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors">
+                <span class="text-xs font-bold text-slate-700">${name}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-emerald-600">Rp ${val.toLocaleString()}</span>
+                    <button onclick="updateAssetValue('${name}')" class="text-[10px] text-blue-500 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 font-bold">Update</button>
+                </div>
+            </div>`; 
+        }).join('') : `<p class="text-center text-[10px] text-gray-400 py-2">Belum ada aset.</p>`;
+
+        // Update Total Display
         document.getElementById('total-invest-assets').innerText = `Total: Rp ${totalAssets.toLocaleString()}`;
-        document.getElementById('total-wealth').innerText = `Rp ${(Object.values(walletBals).reduce((a,b)=>a+b,0) + totalAssets).toLocaleString()}`;
-        const filtered = transactions.filter(t => { const d = new Date(t.ts); return d.getMonth() === m && d.getFullYear() === y && t.type === 'expense' && (t.category.toLowerCase().includes('tagihan') || t.label.toLowerCase().includes('tagihan')); });
-        let billTotal = filtered.reduce((a,b) => a + Number(b.amount), 0);
+        const currentNetWorth = totalCash + totalAssets;
+        document.getElementById('total-wealth').innerText = `Rp ${currentNetWorth.toLocaleString()}`;
+
+        // Render Tagihan (Bill) - Filter sesuai bulan terpilih
+        const filteredBills = transactions.filter(t => { 
+            const d = new Date(t.ts); 
+            return d.getMonth() === m && d.getFullYear() === y && t.type === 'expense' && (t.category.toLowerCase().includes('tagihan') || t.label.toLowerCase().includes('tagihan')); 
+        });
+        let billTotal = filteredBills.reduce((a,b) => a + Number(b.amount), 0);
         document.getElementById('inq-bill-total').innerText = `Total: Rp ${billTotal.toLocaleString()}`;
-        document.getElementById('inq-bill-list').innerHTML = filtered.length ? filtered.map(t => `<div class="flex justify-between items-center p-3 hover:bg-blue-50"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p></div><p class="text-xs font-black text-blue-600">Rp ${Number(t.amount).toLocaleString()}</p></div>`).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan.</p>`;
+        document.getElementById('inq-bill-list').innerHTML = filteredBills.length ? filteredBills.map(t => 
+            `<div class="flex justify-between items-center p-3 hover:bg-blue-50 transition-colors"><div><p class="text-xs font-bold text-gray-700">${t.label}</p><p class="text-[9px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p></div><p class="text-xs font-black text-blue-600">Rp ${Number(t.amount).toLocaleString()}</p></div>`
+        ).join('') : `<p class="p-4 text-center text-[10px] text-gray-400 italic">Tidak ada tagihan.</p>`;
+
+        // ==========================================
+        // 3. LOGIC CHARTS (Tetap menggunakan Logic Snapshot)
+        // ==========================================
+        if(!document.getElementById('view-inquiry').classList.contains('hidden')) {
+            
+            // --- A. Pie Chart: Cash vs Asset (Realtime) ---
+            const ctxPie = document.getElementById('inqPieChart').getContext('2d');
+            if (chartInstances.inqPie) chartInstances.inqPie.destroy();
+
+            chartInstances.inqPie = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cash / Likuid', 'Aset Investasi'],
+                    datasets: [{
+                        data: [totalCash, totalAssets],
+                        backgroundColor: ['#3b82f6', '#10b981'], 
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 10} } }
+                    }
+                }
+            });
+
+            // --- B. Line Chart: Trend Net Worth (History Snapshot) ---
+            const ctxLine = document.getElementById('inqLineChart').getContext('2d');
+            if (chartInstances.inqLine) chartInstances.inqLine.destroy();
+
+            // Ambil data history dari config
+            let historyData = config.netWorthHistory || [];
+            
+            // Jika kosong, pakai data saat ini sebagai dummy visual
+            if (historyData.length === 0) {
+                const now = new Date();
+                historyData = [{
+                    label: now.toLocaleString('id-ID', { month: 'short' }),
+                    total: totalCash + totalAssets
+                }];
+            }
+
+            const labels = historyData.map(d => d.label);
+            const dataValues = historyData.map(d => d.total);
+
+            chartInstances.inqLine = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Worth',
+                        data: dataValues,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6366f1',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: false, 
+                            ticks: { 
+                                callback: function(value) { return (value / 1000000).toFixed(0) + 'jt'; },
+                                color: '#94a3b8', font: {size: 9} 
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { ticks: { color: '#94a3b8', font: {size: 9} }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return 'Rp ' + context.raw.toLocaleString('id-ID'); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     };
 
+    // --- UPDATE: MODAL MUTASI DENGAN SALDO HEADER ---
     window.showWalletMutation = (walletName) => {
         const modal = document.getElementById('modal-mutation');
         const listContainer = document.getElementById('mutation-list');
-        document.getElementById('mutation-title').innerText = `Mutasi: ${walletName}`;
+        // Ambil container judul untuk menaruh info saldo
+        const titleContainer = document.querySelector('#modal-mutation h3').parentElement; 
+
+        // 1. Hitung Saldo Realtime Wallet Ini
+        // Mulai dari saldo awal di config
+        let currentBalance = config.wallets[walletName] || 0;
+        
+        // Loop semua transaksi untuk hitung saldo akhir
+        transactions.forEach(t => {
+            const amt = Number(t.amount) || 0;
+            // Jika wallet ini adalah SUMBER dana
+            if (t.wallet === walletName) {
+                if (t.type === 'income') currentBalance += amt;       // Pemasukan
+                else if (t.type === 'expense') currentBalance -= amt; // Pengeluaran
+                else if (t.type === 'transfer') currentBalance -= amt; // Transfer Keluar
+            }
+            // Jika wallet ini adalah TUJUAN dana (Transfer Masuk)
+            if (t.type === 'transfer' && t.targetWallet === walletName) {
+                currentBalance += amt;
+            }
+        });
+
+        // 2. Update Tampilan Header Modal
+        document.getElementById('mutation-title').innerText = walletName; // Nama Wallet jadi Judul
+        
+        // Cek apakah elemen saldo sudah ada? Kalau belum, buat baru.
+        let balanceDisplay = document.getElementById('mutation-balance-display');
+        if (!balanceDisplay) {
+            balanceDisplay = document.createElement('p');
+            balanceDisplay.id = 'mutation-balance-display';
+            balanceDisplay.className = "text-sm text-slate-500 mt-1";
+            titleContainer.appendChild(balanceDisplay);
+        }
+        
+        // Isi teks saldo
+        balanceDisplay.innerHTML = `Saldo: <span class="font-black text-emerald-600 text-base">Rp ${currentBalance.toLocaleString('id-ID')}</span>`;
+
+        // 3. Render List Mutasi (Sama seperti sebelumnya)
         const history = transactions.filter(t => t.wallet === walletName || t.targetWallet === walletName);
         history.sort((a,b) => new Date(b.ts) - new Date(a.ts));
-        if(history.length === 0) { listContainer.innerHTML = '<p class="text-center p-5 text-gray-400 text-xs italic">Belum ada transaksi.</p>'; } 
-        else {
+        
+        if(history.length === 0) { 
+            listContainer.innerHTML = '<p class="text-center p-10 text-gray-400 text-xs italic">Belum ada transaksi.</p>'; 
+        } else {
             listContainer.innerHTML = history.map(t => {
                 const isIncoming = (t.type === 'income') || (t.type === 'transfer' && t.targetWallet === walletName);
-                const isExpense = (t.type === 'expense') || (t.type === 'transfer' && t.wallet === walletName);
+                
                 let color = isIncoming ? 'text-emerald-600' : 'text-rose-600';
                 let sign = isIncoming ? '+' : '-';
                 let desc = t.label;
+                let subDesc = `${new Date(t.ts).toLocaleDateString()} • ${t.category}`;
+                
                 if(t.type === 'transfer') {
                     color = isIncoming ? 'text-blue-600' : 'text-orange-500';
-                    if(isIncoming) desc = `Transfer dari ${t.wallet} (${t.label})`;
-                    else desc = `Transfer ke ${t.targetWallet} (${t.label})`;
+                    if(isIncoming) {
+                        desc = `Diterima dari ${t.wallet}`;
+                        subDesc += ` (${t.label})`;
+                    } else {
+                        desc = `Dikirim ke ${t.targetWallet}`;
+                        subDesc += ` (${t.label})`;
+                    }
                 }
-                return `<div class="p-3 hover:bg-gray-50 flex justify-between items-center"><div><p class="text-xs font-bold text-gray-700">${desc}</p><p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} ${new Date(t.ts).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} • ${t.user}</p></div><span class="text-xs font-bold ${color}">${sign} Rp ${Number(t.amount).toLocaleString()}</span></div>`;
+
+                return `
+                <div class="p-3 hover:bg-gray-50 flex justify-between items-center border-b border-gray-100 last:border-0 transition-colors">
+                    <div>
+                        <p class="text-xs font-bold text-gray-700">${desc}</p>
+                        <p class="text-[10px] text-gray-400">${subDesc}</p>
+                    </div>
+                    <span class="text-xs font-bold ${color}">${sign} Rp ${Number(t.amount).toLocaleString()}</span>
+                </div>`;
             }).join('');
         }
+        
         modal.classList.remove('hidden');
     };
-
     function renderConfigList() {
         const uList = document.getElementById('list-users-config');
         const users = config.users || [];
@@ -960,34 +1177,97 @@
     // Fungsi untuk membuka modal dan filter data
     // --- 1. LOGIC MODAL MUTASI (Tempel di paling bawah script) ---
     // --- 1. UPDATE LOGIC MODAL (Supaya bisa baca 'SEMUA') ---
+    // --- UPDATE: MODAL KATEGORI/INCOME/EXPENSE DENGAN TOTAL & BUDGET ---
     window.showMutasiByCategory = (categoryName, type) => {
         const modal = document.getElementById('modalMutasi');
         const content = document.getElementById('modalContent');
         const title = document.getElementById('modalTitle');
         
-        // Ambil bulan & tahun yang sedang dipilih
+        // Ambil elemen parent judul untuk menaruh info Total/Saldo
+        // Struktur HTML: div.border-b > h3#modalTitle
+        const headerContainer = title.parentElement; 
+
+        // 1. Ambil Filter Bulan & Tahun
         const m = parseInt(document.getElementById('filter-month').value);
         const y = parseInt(document.getElementById('filter-year').value);
 
-        // Atur Judul Modal
-        if (categoryName === 'SEMUA') {
-            title.innerText = `Mutasi: SEMUA ${type === 'income' ? 'PEMASUKAN' : 'PENGELUARAN'}`;
-        } else {
-            title.innerText = `Mutasi: ${categoryName}`;
-        }
-        
-        content.innerHTML = '<p class="text-center text-gray-400">Memuat...</p>';
-        modal.classList.remove('hidden');
-
-        // Filter Transaksi
+        // 2. Filter Data Transaksi
         const filtered = transactions.filter(t => {
             const d = new Date(t.ts);
             const matchDate = d.getMonth() === m && d.getFullYear() === y;
-            // Kuncinya disini: Kalau 'SEMUA', kategori apapun dianggap benar
             const matchCat = (categoryName === 'SEMUA') ? true : t.category === categoryName; 
             const matchType = (type === 'all' || t.type === type);
             return matchDate && matchCat && matchType;
         }).sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+        // 3. Hitung Total Nominal (SUM)
+        const totalAmount = filtered.reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+        // 4. Update Judul & Header Info
+        let displayTitle = '';
+        if (categoryName === 'SEMUA') {
+            displayTitle = `Mutasi: SEMUA ${type === 'income' ? 'PEMASUKAN' : 'PENGELUARAN'}`;
+        } else {
+            displayTitle = `Mutasi: ${categoryName}`;
+        }
+        title.innerText = displayTitle;
+
+        // --- BAGIAN BARU: Tampilkan Total & Limit Budget ---
+        // Cek apakah elemen info saldo sudah ada? Kalau belum, buat.
+        let infoDisplay = document.getElementById('cat-mutation-info');
+        if (!infoDisplay) {
+            infoDisplay = document.createElement('div');
+            infoDisplay.id = 'cat-mutation-info';
+            infoDisplay.className = "mt-1";
+            headerContainer.insertBefore(infoDisplay, title.nextSibling); // Taruh di bawah judul, sebelum tombol close (kalau flex) atau append
+             // Karena parent pakai flex justify-between, kita append ke dalam div judul atau ubah struktur sedikit
+             // Biar aman dan rapi, kita taruh TEPAT DI DALAM div judul kalau bisa, atau kita inject text html
+        }
+        
+        // Cek apakah ada Budget/Limit untuk kategori ini?
+        let budgetInfo = '';
+        if (categoryName !== 'SEMUA' && config.budgets && config.budgets[categoryName]) {
+            const limit = config.budgets[categoryName];
+            // Format: Terpakai / Limit
+            budgetInfo = `<span class="text-xs text-gray-400 font-normal ml-1">/ Limit: ${limit.toLocaleString()}</span>`;
+        }
+
+        // Tentukan Warna Teks Total
+        const colorClass = (type === 'income') ? 'text-emerald-600' : 'text-rose-600';
+        
+        // Render HTML Info
+        // Kita paksa taruh di bawah judul menggunakan insertAdjacentHTML atau manipulasi DOM
+        // Cara paling aman: Kita inject <p> baru di bawah <h3>Title</h3>
+        
+        // Hapus info lama kalau ada (untuk refresh)
+        const oldInfo = headerContainer.querySelector('.dynamic-total-info');
+        if(oldInfo) oldInfo.remove();
+
+        const infoHtml = document.createElement('div');
+        infoHtml.className = "dynamic-total-info text-sm text-slate-500 mt-0.5";
+        infoHtml.innerHTML = `Total: <span class="font-black ${colorClass} text-base">Rp ${totalAmount.toLocaleString('id-ID')}</span> ${budgetInfo}`;
+        
+        // Masukkan di bawah h3 (Title)
+        // Struktur: [H3 Title] [Info Baru] .... [Button Close]
+        // Tapi div parentnya flex row. Jadi kita harus bungkus Title dan Info dalam satu Div agar vertikal.
+        
+        // Trik UI: Cek apakah Title sudah dibungkus?
+        if (title.parentElement.tagName !== 'DIV' || !title.parentElement.classList.contains('flex-col')) {
+            // Bungkus H3 biar bisa ditumpuk dengan Info
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col";
+            title.parentNode.insertBefore(wrapper, title);
+            wrapper.appendChild(title);
+            wrapper.appendChild(infoHtml);
+        } else {
+            // Kalau sudah dibungkus, tinggal append
+            title.parentElement.appendChild(infoHtml);
+        }
+        // --------------------------------------------------
+
+        // 5. Render List Transaksi
+        content.innerHTML = '<p class="text-center text-gray-400">Memuat...</p>';
+        modal.classList.remove('hidden');
 
         if(filtered.length === 0) {
             content.innerHTML = '<p class="text-center text-gray-400 py-10 italic">Tidak ada transaksi bulan ini.</p>';
@@ -998,13 +1278,12 @@
             <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
                 <div>
                     <p class="font-bold text-sm text-gray-700">${t.label}</p>
-                    <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.category}</p>
+                    <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p>
                 </div>
                 <div class="text-right">
                     <p class="font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
                         ${Number(t.amount).toLocaleString('id-ID')}
                     </p>
-                    <p class="text-[9px] text-gray-400 italic">${t.wallet}</p>
                 </div>
             </div>
         `).join('');
@@ -1028,6 +1307,47 @@
     }
     
     window.exportData = () => { const csv = "Tanggal,Jam,User,Tipe,Kategori,Wallet,Target,Label,Nominal\n" + transactions.map(t => { const d = new Date(t.ts); return `${d.toLocaleDateString()},${d.toLocaleTimeString()},${t.user},${t.type},${t.category},${t.wallet||''},${t.targetWallet||''},"${t.label}",${t.amount}`; }).join("\n"); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'Laporan.csv'; a.click(); };
+    // --- FITUR SNAPSHOT NET WORTH ---
+    window.saveNetWorthSnapshot = async () => {
+        // 1. Hitung Total Saat Ini
+        const totalCash = Object.values(config.wallets).reduce((a,b)=>a+b, 0);
+        const totalAssets = Object.values(config.assets || {}).reduce((a,b)=>a+b, 0);
+        
+        // 2. Siapkan Data
+        const now = new Date();
+        const periodId = now.toISOString().slice(0, 7); // Format "YYYY-MM" (Biar 1 bulan 1 data)
+        
+        const snapshot = {
+            id: periodId,
+            date: now.toISOString(),
+            label: now.toLocaleString('id-ID', { month: 'short', year: '2-digit' }),
+            cash: totalCash,
+            asset: totalAssets,
+            total: totalCash + totalAssets
+        };
+
+        // 3. Simpan ke Config
+        if(!config.netWorthHistory) config.netWorthHistory = [];
+        
+        // Cek apakah bulan ini sudah ada? Kalau ada, timpa (update)
+        const existingIdx = config.netWorthHistory.findIndex(x => x.id === periodId);
+        if(existingIdx >= 0) {
+            if(confirm("Data bulan ini sudah ada. Update dengan saldo terbaru?")) {
+                config.netWorthHistory[existingIdx] = snapshot;
+            } else {
+                return;
+            }
+        } else {
+            config.netWorthHistory.push(snapshot);
+        }
+
+        // Urutkan berdasarkan tanggal (lama ke baru)
+        config.netWorthHistory.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+        await saveConfig();
+        alert("Snapshot Net Worth tersimpan! 📸");
+        renderInquiry(); // Refresh chart
+    };
     
     window.renderUI = () => { updateHeader(); renderChat(); renderDataList(); renderStats(); renderInquiry(); renderPlanning(); };
     function updateHeader() { document.getElementById('user-avatar').innerText = currentUser.charAt(0).toUpperCase(); document.getElementById('status-text').innerText = db ? `(online) ${currentUser}` : `(local) ${currentUser}`; document.getElementById('sync-status').className = db ? "w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse border border-emerald-200" : "w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"; }
