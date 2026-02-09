@@ -53,19 +53,61 @@
             border-bottom: 1px solid rgba(0,0,0,0.05); transition: background-color 0.3s;
         }
 
+        /* Container Tombol (Posisi Melayang) */
         .float-btn-group {
-            position: absolute; bottom: 90px; right: 15px;
-            display: flex; flex-direction: column; gap: 12px; z-index: 100;
+            position: absolute; 
+            bottom: 160px; /* Posisi agak tinggi biar gak nabrak chips */
+            right: 20px;   /* Jarak dari kanan */
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;     /* Jarak antar tombol atas/bawah */
+            z-index: 50;
+            pointer-events: none; /* Biar area kosong gak ngeblok klik */
         }
 
+        /* Style Tombol Biru Mencolok */
         .btn-float {
-            width: 40px; height: 40px; background-color: white;
-            border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            display: flex; align-items: center; justify-content: center;
-            color: #54656f; cursor: pointer; border: 1px solid #e5e7eb;
-            transition: transform 0.2s;
+            pointer-events: auto; /* Tombolnya harus bisa diklik */
+            width: 45px; 
+            height: 45px; 
+            
+            /* Warna Biru Mencolok */
+            background-color: #2563eb; /* Tailwind Blue-600 */
+            color: white;              /* Ikon Putih */
+            border: 2px solid #60a5fa; /* Border Biru Muda biar Pop */
+            
+            /* Bentuk & Posisi */
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            
+            /* Bayangan Glowing Biru */
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5); 
+            
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-float:active { transform: scale(0.9); background-color: #f0f2f5; }
+
+        /* Efek saat Hover (Disentuh mouse/jari) */
+        .btn-float:hover {
+            background-color: #1d4ed8; /* Biru lebih gelap */
+            transform: scale(1.1);     /* Membesar sedikit */
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.7);
+        }
+
+        /* Efek saat Diklik */
+        .btn-float:active {
+            transform: scale(0.9);
+            background-color: #1e40af;
+        }
+
+        /* Class Bantuan untuk Animasi Muncul (Dipakai di Javascript) */
+        .btn-show {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            display: flex !important;
+        }
 
         .bubble { padding: 8px 12px; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); max-width: 80%; min-width: 140px; position: relative; margin-bottom: 2px; }
         .bubble-me { background-color: #e7ffdb; border-top-right-radius: 0; }
@@ -124,26 +166,26 @@
         <div class="mb-10 flex flex-col items-center">
             <img src="data:image/jpeg;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/xAAC/9oADAMBAAIAAwAAABDzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzjDDzzzzzzzzzzzzzzzyQfrLLLLLLbLLP/LfX1h/DzzzzzzzzzzjE8kE0131jLe8YIW0PC2RlzzzzzzzzzwXTnHPa45rL3Tisvm8gtTh37zzzzzzzzx3/wD6wwgMNPkXCPlScvWZ9T388888888+JAC9/wA96HGPWT9ibJXStXKk/fPPPPPPOv0cRTepoL6Uq5WbvSVMgcpzFvPPPPPPPo8spSU+Yr9Ax7xlmPQUrwE01vPPPPPPPLUcTzViGGzJxPKqZQKxm6BCVvPPPPPPPJ0FvE8++xkA7sL9HyteLpvZ1PPPPPPPLMsfUmNLd7JZF6EaUBzPknyelvPPPPPPPudimgtfqX5Icd6VLoclSXm3ffPPPPPPOG91FlRLO8RUWTd2tXiSh98x/PPPPPPPPMfzygE42IT27k0LlOj2Jx8A9PPPPPPPPoOMhjDTqTocTZllSbvaHme8ffPPPPPPPG03AEgJ8AetXeg1UG/Q+HlmdPPPPPPPPjPGOjgXq7XnO0fj9h4oewlvNPPPPPPPOLf/AIsHPNhHuRBk3UU8YQ/+87zzzzzzzzwBrPCmRnuAXubYEemA9ONcqH3zzzzzzymX+wgtbbOH2aCR4CVU88M7/j7zzzzzzz5p3jIg16iOU9fzWqn/AK44M1p+8888888q4Z9KAR26EtKclKnunwwUhSy388888888safSwXsvBwQ5kw1rnO+KMJ4988888888wCm7MKrw+9IL7188NISO0w/9888888885dckt6wn6z4+e9pR1cS6fM5888888888998IAAIQwwg05F88518885V88888888889NNBRBBBxFNd8888sNhNc88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888/8QANxEAAgIBAQUFBwMBCQAAAAAAA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" alt="Logo" class="w-24 h-24 rounded-3xl mb-4 shadow-2xl shadow-indigo-500/50 object-cover border-4 border-slate-800">
             <h1 class="text-3xl font-black text-white tracking-tight">✍🏻 #CatetDuluAja</h1>
-            <p class="text-slate-500 text-sm mt-1">📍YOUR FUNDS COMPANION</p>
-            <p class="text-slate-700 text-[10px] font-bold uppercase tracking-[0.2em] border-t border-slate-800 pt-4 mt-2 px-2">➖ Pencatatan Keuangan Digital anda ➖</p>
+            <p class="text-slate-500 text-sm mt-1">🚀 YOUR FUNDS COMPANION</p>
+            <p class="text-slate-700 text-[10px] font-bold uppercase text-white tracking-[0.2em] border-t border-slate-800 pt-4 mt-2 px-2">➖ Pencatatan Keuangan Digital anda ➖</p>
         </div>
         <div class="mb-8 flex flex-col items-center space-y-3">
             <div class="w-20 h-20 bg-emerald-500 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl shadow-emerald-500/50 mb-4">🔐</div>
-            <p class="text-slate-700 text-[14px] font-bold uppercase tracking-[0.2em] border-t border-slate-900 pt-4 mt-2 px-2">• ONE ACCESS ☢️ CONTROL ALL •</p>
+            <p class="text-slate-700 text-[16px] font-bold uppercase text-white tracking-tight tracking-[0.2em] border-t border-slate-900 pt-4 mt-2 px-2">• ONE ACCESS 🕹️ CONTROL ALL •</p>
         </div>
         <div id="login-user-select" class="space-y-3 mb-6"></div>
         <div id="login-pin-area" class="hidden">
-            <p id="login-greeting" class="text-white font-bold mb-4 text-lg">Halo, User!</p>
+            <p id="login-greeting" class="text-white font-bold mb-4 text-lg">Halo, User! 🙋🏻</p>
             <div class="flex justify-center gap-2 mb-2">
                 <input type="password" id="input-pin" maxlength="6" class="bg-slate-800 border border-slate-700 text-white text-center text-2xl tracking-[0.5em] rounded-xl w-full py-4 outline-none focus:border-emerald-500 transition-colors" placeholder="••••••" inputmode="numeric">
             </div>
             <p class="text-slate-500 text-[10px] mb-6 italic">💡 Hint: PIN Default adalah <b>123456</b></p>
             <div class="flex gap-2">
-                <button onclick="resetLogin()" class="flex-1 py-3 bg-slate-700 text-slate-300 font-bold rounded-xl hover:bg-slate-600 transition-colors">Kembali</button>
-                <button onclick="verifyPin()" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors">Masuk ➤</button>
+                <button onclick="resetLogin()" class="flex-1 py-3 bg-slate-700 text-slate-300 font-bold rounded-xl hover:bg-slate-600 transition-colors">↩️ Kembali</button>
+                <button onclick="verifyPin()" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors"> Login ➜] </button>
             </div>
         </div>
-        <button id="btn-init-user" onclick="toggleModal('modal-settings')" class="hidden mt-4 text-slate-500 text-xs font-bold underline">Buat User Baru</button>
+        <button id="btn-init-user" onclick="toggleModal('modal-settings')" class="hidden mt-4 text-slate-500 text-xs font-bold underline">👥 Buat User Baru</button>
     </div>
 </div>
 
@@ -157,13 +199,16 @@
                 <h1 class="font-bold text-base leading-tight">✍🏻 #CatetDuluAja</h1>
                 <div class="flex items-center gap-1.5">
                     <span id="sync-status" class="w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"></span>
-                    <p id="status-text" class="text-[10px] text-emerald-100 font-medium">Local</p>
+                    <p id="status-text" class="text-[10px] text-emerald-100 font-medium">💾 Local</p>
                 </div>
             </div>
         </div>
         <div class="flex gap-2">
             <button onclick="toggleModal('modal-reminder')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all" title="Pengingat"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
             <button onclick="toggleModal('modal-transfer')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all" title="Transfer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            <button onclick="toggleModal('modal-shopping')" class="p-2 hover:bg-white/10 rounded-full transition-colors" title="Daftar Belanja">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </button>
             <button onclick="toggleModal('modal-settings')" class="p-2 hover:bg-white/10 rounded-full transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M7.068.727c.243-.97 1.62-.97 1.864 0l.071.286a.96.96 0 0 0 1.622.434l.205-.211c.695-.719 1.888-.03 1.613.931l-.08.284a.96.96 0 0 0 1.187 1.187l.283-.081c.96-.275 1.65.918.931 1.613l-.211.205a.96.96 0 0 0 .434 1.622l.286.071c.97.243.97 1.62 0 1.864l-.286.071a.96.96 0 0 0-.434 1.622l.211.205c.719.695.03 1.888-.931 1.613l-.284-.08a.96.96 0 0 0-1.187 1.186l-.081.283c.275.96-.918 1.65-1.613.931l-.205-.211a.96.96 0 0 0-1.622.434l-.071.286c-.243.97-1.62.97-1.864 0l-.071-.286a.96.96 0 0 0-1.622-.434l-.205.211c-.695.719-1.888.03-1.613-.931l.08-.284a.96.96 0 0 0-1.186-1.187l-.284.081c-.96.275-1.65-.918-.931-1.613l.211-.205a.96.96 0 0 0-.434-1.622l-.286-.071c-.97-.243-.97-1.62 0-1.864l.286-.071a.96.96 0 0 0 .434-1.622l-.211-.205c-.719-.695-.03-1.888.931-1.613l.284.08a.96.96 0 0 0 1.187-1.186l-.081-.284c-.275-.96.918-1.65 1.613-.931l.205.211a.96.96 0 0 0 1.622-.434zM12.973 8.5H8.25l-2.834 3.779A4.998 4.998 0 0 0 12.973 8.5m0-1a4.998 4.998 0 0 0-7.557-3.779l2.834 3.78zM5.048 3.967l-.087.065zm-.431.355A4.98 4.98 0 0 0 3.002 8c0 1.455.622 2.765 1.615 3.678L7.375 8zm.344 7.646.087.065z"/></svg></button>
         </div>
     </header>
@@ -186,10 +231,10 @@
                 <div id="sticky-reminder-container" class="w-full px-4 pt-4"></div>
                 <div id="messages-list" class="space-y-3 px-4 pb-20 pt-2 flex-1"></div>
             </div>
-            <div class="float-btn-group">
+            <!-- <div class="float-btn-group">
                 <div class="btn-float" onclick="scrollToTop()" title="Ke Atas"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></div>
                 <div class="btn-float" onclick="scrollToBottom()" title="Ke Bawah"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
-            </div>
+            </div> -->
         </main>
 
         <!-- TAB DATA -->
@@ -304,7 +349,15 @@
             </div>
         </main>
     </div>
+    <div class="float-btn-group">
+        <div id="btn-top" class="btn-float hidden transition-all duration-300 opacity-0 transform translate-y-10" onclick="scrollToTop()" title="Ke Atas">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+        </div>
 
+        <div id="btn-bottom" class="btn-float hidden transition-all duration-300 opacity-0 transform translate-y-10" onclick="scrollToBottom()" title="Ke Bawah">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+    </div>
     <!-- FOOTER -->
     <footer id="footer-chat" class="p-2 bg-[#f0f2f5] flex flex-col gap-2 border-t border-gray-300 z-40 shrink-0 w-full transition-colors">
         <div id="quick-chips" class="chips-container mb-1"></div>
@@ -329,31 +382,31 @@
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Nominal</label><input type="number" id="edit-amount" class="w-full border rounded-lg p-2.5 text-sm"></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Wallet</label><select id="edit-wallet" class="w-full border rounded-lg p-2.5 text-sm bg-white"></select></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Kategori</label><select id="edit-category" class="w-full border rounded-lg p-2.5 text-sm bg-white"></select></div>
-                <div class="flex gap-2 pt-2"><button onclick="closeEditModal()" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">Batal</button><button onclick="saveEditTransaction()" class="flex-1 py-3 bg-emerald-600 text-white rounded-lg font-bold text-xs">Simpan</button></div>
+                <div class="flex gap-2 pt-2"><button onclick="closeEditModal()" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">🔙 Batal</button><button onclick="saveEditTransaction()" class="flex-1 py-3 bg-emerald-600 text-white rounded-lg font-bold text-xs">💾 Simpan</button></div>
             </div>
         </div>
     </div>
 
     <div id="modal-transfer" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">Transfer</h3><button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold">×</button></div>
+            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">💱 Transfer</h3><button onclick="toggleModal('modal-transfer')" class="text-gray-400 text-2xl font-bold">×</button></div>
             <div class="space-y-4">
                 <div class="flex gap-2 items-center"><div class="flex-1"><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Dari</label><select id="tf-from" class="w-full border rounded-lg p-2 text-sm bg-gray-50 font-bold outline-none"></select></div><div class="text-gray-300">➜</div><div class="flex-1"><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Ke</label><select id="tf-to" class="w-full border rounded-lg p-2 text-sm bg-gray-50 font-bold outline-none"></select></div></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Nominal (Rp)</label><input type="number" id="tf-amount" class="w-full border rounded-lg p-2.5 text-sm font-bold text-blue-600 outline-none"></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Catatan</label><input type="text" id="tf-note" placeholder="Cth: Topup e-money" class="w-full border rounded-lg p-2.5 text-sm outline-none"></div>
-                <div class="flex gap-2 pt-2"><button onclick="toggleModal('modal-transfer')" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">Batal</button><button onclick="handleTransfer()" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold text-xs">Kirim</button></div>
+                <div class="flex gap-2 pt-2"><button onclick="toggleModal('modal-transfer')" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">🔙 Batal</button><button onclick="handleTransfer()" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold text-xs">💸 Kirim</button></div>
             </div>
         </div>
     </div>
 
     <div id="modal-reminder" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
-            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">Pengingat</h3><button onclick="toggleModal('modal-reminder')" class="text-gray-400 text-2xl font-bold">×</button></div>
+            <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">📢 Pengingat</h3><button onclick="toggleModal('modal-reminder')" class="text-gray-400 text-2xl font-bold">×</button></div>
             <div class="space-y-4">
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Judul</label><input type="text" id="remind-title" placeholder="Cth: SIM" class="w-full border rounded-lg p-2.5 text-sm"></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Jatuh Tempo</label><input type="date" id="remind-date" class="w-full border rounded-lg p-2.5 text-sm"></div>
                 <div><label class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Ingatkan H-</label><input type="number" id="remind-alert" value="7" class="w-full border rounded-lg p-2.5 text-sm"></div>
-                <div class="flex gap-2 pt-2"><button onclick="toggleModal('modal-reminder')" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">Batal</button><button onclick="saveReminder()" class="flex-1 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xs">Simpan</button></div>
+                <div class="flex gap-2 pt-2"><button onclick="toggleModal('modal-reminder')" class="flex-1 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">🔙 Batal</button><button onclick="saveReminder()" class="flex-1 py-3 bg-yellow-500 text-white rounded-lg font-bold text-xs">💾 Simpan</button></div>
                 <hr><div id="reminder-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
             </div>
         </div>
@@ -363,7 +416,7 @@
         <div class="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl">
             <h3 class="font-bold text-lg mb-4 text-slate-800 text-center">Pilih User</h3>
             <div id="user-list-container" class="space-y-2 max-h-60 overflow-y-auto"></div>
-            <button onclick="toggleModal('modal-user-select')" class="w-full mt-4 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">Batal</button>
+            <button onclick="toggleModal('modal-user-select')" class="w-full mt-4 py-3 text-gray-500 font-bold text-xs bg-gray-100 rounded-lg">🔙 Batal</button>
         </div>
     </div>
 
@@ -382,12 +435,32 @@
             </div>
         </div>
     </div>
+    <div id="modal-shopping" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-sm flex flex-col max-h-[85vh] shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-emerald-50 rounded-t-2xl shrink-0">
+                <h3 class="font-bold text-lg text-emerald-800 flex items-center gap-2">🛒 Daftar Belanja</h3>
+                <button onclick="toggleModal('modal-shopping')" class="text-gray-400 hover:text-red-500 text-2xl font-bold">×</button>
+            </div>
+            
+            <div class="p-3 bg-white border-b shadow-sm z-10 shrink-0">
+                <div class="flex gap-2">
+                    <input type="text" id="shop-input" placeholder="Tulis barang..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-colors" onkeydown="if(event.key === 'Enter') addShoppingItem()">
+                    <button id="btn-add-shopping" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-lg hover:bg-emerald-700 active:scale-95 transition-transform">+</button>
+                </div>
+            </div>
 
+            <div id="shopping-list-container" class="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50 scroll-hide min-h-[150px]"></div>
+            
+            <div class="p-3 bg-gray-50 text-center rounded-b-2xl border-t text-[10px] text-gray-400 shrink-0">
+                *Daftar ini sinkron otomatis 🗘
+            </div>
+        </div>
+    </div>
     <div id="modal-mutation" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm flex flex-col max-h-[70vh] shadow-2xl">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl"><div><h3 id="mutation-title" class="font-bold text-lg text-slate-800">Mutasi</h3><p class="text-[10px] text-gray-500">Riwayat:</p></div><button onclick="document.getElementById('modal-mutation').classList.add('hidden')" class="text-gray-400 text-2xl font-bold">×</button></div>
             <div id="mutation-list" class="flex-1 overflow-y-auto p-0 scroll-hide divide-y divide-gray-100"></div>
-            <div class="p-3 bg-gray-50 text-center rounded-b-2xl border-t"><button onclick="document.getElementById('modal-mutation').classList.add('hidden')" class="w-full py-2 bg-gray-200 text-gray-600 rounded-lg font-bold text-xs">Tutup</button></div>
+            <div class="p-3 bg-gray-50 text-center rounded-b-2xl border-t"><button onclick="document.getElementById('modal-mutation').classList.add('hidden')" class="w-full py-2 bg-gray-200 text-gray-600 rounded-lg font-bold text-xs">❌ Tutup</button></div>
         </div>
     </div>
     <div id="modalMutasi" class="modal-container hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -399,7 +472,7 @@
         <div id="modalContent" class="flex-1 overflow-y-auto p-4 space-y-3">
             </div>
         <div class="p-4 border-t bg-gray-50 text-right">
-            <button onclick="closeModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">Tutup</button>
+            <button onclick="closeModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">❌ Tutup</button>
         </div>
     </div>
 </div>
@@ -411,6 +484,11 @@
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
     let db = null, auth = null;
+    //let globalShoppingList = []; 
+    // --- TAMBAHAN GLOBAL VARIABLE ---
+    let chatLimit = 20; // Mulai dengan menampilkan 20 pesan
+    let isLoadingMore = false; // Penanda agar tidak double loading
+
     const COL_TX = 'transactions', COL_DATA = 'app_data', DOC_CONFIG = 'config';
     let transactions = JSON.parse(localStorage.getItem('wa_tx_data')) || [];
     const GEMINI_API_KEY = "AIzaSyBpS0_lUEe5ebkDWqFxNi1e5Zk-wgpfhBw";
@@ -420,16 +498,113 @@
         wallets: { 'Cash': 0 }, 
         assets: {}, budgets: {}, goals: [], reminders: [], users: [], quickChips: defaultChips
     };
+    if(!config.shoppingList || !Array.isArray(config.shoppingList)) config.shoppingList = [];
     if(!config.quickChips) config.quickChips = defaultChips;
     let currentUser = localStorage.getItem('wa_user_name') || 'User';
     let tempSelectedUser = null;
     let chartInstances = { pie: null, userPie: null };
     let idleTimer;
     const IDLE_LIMIT = 5 * 60 * 1000;
+    // ========================================
+    // SHOPPING LIST FUNCTIONS
+    // ========================================
+    function renderShoppingListInternal() {
+        const container = document.getElementById('shopping-list-container');
+        if (!container) return; 
+
+        if (!config.shoppingList || !Array.isArray(config.shoppingList)) {
+            config.shoppingList = [];
+        }
+        
+        const list = config.shoppingList;
+        
+        if (list.length === 0) {
+            container.innerHTML = `<div class="flex flex-col items-center justify-center h-40 text-gray-300"><span class="text-4xl mb-2 grayscale">🛒</span><p class="text-xs">Daftar belanja kosong.</p></div>`;
+            return;
+        }
+
+        const sortedList = [...list].sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1);
+
+        container.innerHTML = sortedList.map((item, idx) => {
+            return `
+            <div class="flex items-center justify-between p-3 bg-white rounded-xl border ${item.checked ? 'border-gray-100 bg-gray-50' : 'border-emerald-100 shadow-sm'} mb-2 transition-all">
+                <div data-index="${idx}" class="shop-item-toggle flex items-center gap-3 flex-1 cursor-pointer select-none">
+                    <div class="w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300 bg-white'}">
+                        ${item.checked ? '<span class="text-white text-xs font-bold">✓</span>' : ''}
+                    </div>
+                    <span class="text-sm font-medium ${item.checked ? 'text-gray-400 line-through decoration-2' : 'text-slate-700'}">${item.text}</span>
+                </div>
+                <button data-index="${idx}" class="shop-item-delete text-gray-300 hover:text-red-500 font-bold p-2 px-3 text-lg">×</button>
+            </div>`;
+        }).join('');
+        
+        // Setup event listeners setelah render
+        document.querySelectorAll('.shop-item-toggle').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                toggleShoppingItemInternal(idx);
+            });
+        });
+        
+        document.querySelectorAll('.shop-item-delete').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                deleteShoppingItemInternal(idx);
+            });
+        });
+    }
+
+    async function addShoppingItemHandler() {
+        const input = document.getElementById('shop-input');
+        const val = input.value.trim();
+        if (!val) return;
+
+        if (!config.shoppingList || !Array.isArray(config.shoppingList)) {
+            config.shoppingList = [];
+        }
+        
+        const newItem = { text: val, checked: false };
+        config.shoppingList.unshift(newItem);
+        
+        input.value = '';
+        renderShoppingListInternal();
+        
+        await saveConfig();
+        console.log("✅ Shopping saved:", config.shoppingList);
+    }
+
+    async function toggleShoppingItemInternal(index) {
+        if (!config.shoppingList || !config.shoppingList[index]) return;
+        
+        config.shoppingList[index].checked = !config.shoppingList[index].checked;
+        
+        renderShoppingListInternal();
+        await saveConfig();
+        console.log("✅ Toggle saved");
+    }
+
+    async function deleteShoppingItemInternal(index) {
+        if (!config.shoppingList) return;
+        
+        config.shoppingList.splice(index, 1);
+        
+        renderShoppingListInternal();
+        await saveConfig();
+        console.log("✅ Delete saved");
+    }
+
+    // Expose ke global untuk dipanggil dari luar module
+    window.renderShoppingList = renderShoppingListInternal;
+    // ========================================
+    // END SHOPPING LIST FUNCTIONS
+    // ========================================
+
 
     window.onload = () => { 
         if(localStorage.getItem('wa_dark_mode') === 'true') document.body.classList.add('dark-mode');
+        if (!config.shoppingList) config.shoppingList = [];
         setupFirebase(); initDateFilters();
+        
         if (!config.users || config.users.length === 0) {
             document.getElementById('view-login').classList.add('hidden');
             alert("Selamat datang! Buat User & PIN di Pengaturan.");
@@ -439,10 +614,70 @@
             loginView.classList.remove('hidden');
             loginView.style.opacity = '1';
             renderLoginUsers();
+        }
+        const shopInput = document.getElementById('shop-input');
+        const btnAddShopping = document.getElementById('btn-add-shopping');
+        
+        if (shopInput && btnAddShopping) {
+            btnAddShopping.onclick = () => addShoppingItemHandler();
+            shopInput.onkeydown = (e) => {
+                if (e.key === 'Enter') addShoppingItemHandler();
+            };
         } 
-        renderUI(); renderConfigList(); updateWalletSelects(); renderReminderList(); renderChips();
+        renderUI(); // --- 2. SCROLL LISTENER UNTUK LOAD CHAT ---
+        // --- LOGIC SCROLL: PAGINATION & TOMBOL MELAYANG ---
+        const chatContainer = document.getElementById('view-chat');
+        const btnTop = document.getElementById('btn-top');
+        const btnBottom = document.getElementById('btn-bottom');
+
+        chatContainer.addEventListener('scroll', () => {
+            const currentScroll = chatContainer.scrollTop;
+            const maxScroll = chatContainer.scrollHeight - chatContainer.clientHeight;
+            const distFromBottom = maxScroll - currentScroll;
+
+            // 1. Logic Pagination (Load More kalau mentok atas)
+            if (currentScroll === 0 && !isLoadingMore && chatLimit < transactions.length) {
+                isLoadingMore = true;
+                const prevH = chatContainer.scrollHeight;
+                chatLimit += 20;
+                renderChat();
+                chatContainer.scrollTop = chatContainer.scrollHeight - prevH;
+                isLoadingMore = false;
+            }
+
+            // 2. Logic Tombol Ke ATAS (Muncul kalau sudah scroll ke bawah > 500px)
+            if (currentScroll > 500) {
+                btnTop.classList.remove('hidden');
+                // Sedikit delay biar transisi CSS jalan
+                requestAnimationFrame(() => btnTop.classList.add('btn-show'));
+            } else {
+                btnTop.classList.remove('btn-show');
+                setTimeout(() => btnTop.classList.add('hidden'), 300);
+            }
+
+            // 3. Logic Tombol Ke BAWAH (Muncul kalau kita jauh dari bawah > 200px)
+            if (distFromBottom > 200) {
+                btnBottom.classList.remove('hidden');
+                requestAnimationFrame(() => btnBottom.classList.add('btn-show'));
+            } else {
+                btnBottom.classList.remove('btn-show');
+                setTimeout(() => btnBottom.classList.add('hidden'), 300);
+            }
+        });
+        renderConfigList(); updateWalletSelects(); renderReminderList(); renderChips();
         document.getElementById('msg-input').onkeydown = (e) => e.key === 'Enter' ? handleSendMessage() : null; 
-        document.getElementById('input-pin').onkeydown = (e) => e.key === 'Enter' ? verifyPin() : null;
+        // --- UPDATE: PIN AUTO SUBMIT (Enter & 6 Digit) ---
+        const pinInput = document.getElementById('input-pin');
+        
+        // 1. Support Enter
+        pinInput.onkeydown = (e) => e.key === 'Enter' ? verifyPin() : null;
+        
+        // 2. Support Auto Login pas 6 angka
+        pinInput.oninput = () => {
+            if (pinInput.value.length === 6) {
+                verifyPin();
+            }
+        };
         setupIdleListeners();
         document.getElementById('footer-chat').style.display = 'flex';
         setTimeout(scrollToBottom, 100);
@@ -489,7 +724,10 @@
             document.getElementById('login-greeting').classList.remove('text-yellow-400');
             const loginView = document.getElementById('view-login'); loginView.style.opacity = '0';
             setTimeout(() => { loginView.classList.add('hidden'); }, 300);
-            renderUI(); document.getElementById('input-pin').value = ''; resetLogin(); startIdleTimer();
+            renderUI(); // --- TAMBAHAN: AUTO SET CASH SAAT LOGIN ---
+            document.getElementById('active-wallet').value = 'Cash';
+            // -------------------------------------------
+            document.getElementById('input-pin').value = ''; resetLogin(); startIdleTimer();
         } else { alert("PIN Salah!"); document.getElementById('input-pin').value = ''; }
     };
     window.gantiUser = () => { if(confirm(`Logout dari ${currentUser}?`)) { logout(); } };
@@ -509,17 +747,60 @@
 
     window.toggleDarkMode = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('wa_dark_mode', document.body.classList.contains('dark-mode')); };
     window.switchTab = (tab) => {
+        // 1. Sembunyikan semua tab & matikan status aktif tombol
         ['chat', 'data', 'report', 'inquiry', 'plan'].forEach(v => {
             document.getElementById(`view-${v}`).classList.add('hidden');
             document.getElementById(`tab-${v}`).className = 'flex-1 py-3 tab-inactive transition-all';
         });
+
+        // 2. Munculkan tab tujuan & aktifkan tombol
         document.getElementById(`view-${tab}`).classList.remove('hidden');
         document.getElementById(`tab-${tab}`).className = 'flex-1 py-3 tab-active transition-all';
+        
+        // 3. Atur Footer (hanya muncul di Chat)
         document.getElementById('footer-chat').style.display = tab === 'chat' ? 'flex' : 'none';
-        if(tab === 'chat') { setTimeout(scrollToBottom, 100); } else { document.getElementById(`view-${tab}`).scrollTop = 0; }
-        if(tab === 'report') renderStats(); if(tab === 'inquiry') renderInquiry(); if(tab === 'plan') renderPlanning(); 
-    };
 
+        // 4. Atur Tombol Scroll (Hanya di Chat)
+        const floatGroup = document.querySelector('.float-btn-group');
+        if (floatGroup) {
+            floatGroup.style.display = (tab === 'chat') ? 'flex' : 'none';
+        }
+
+        // --- 5. LOGIC WARNA HEADER & TAB (Fixed) ---
+        // Kita cari SEMUA elemen yang punya class dasar 'wa-green' (Header & Nav)
+        const greenElements = document.querySelectorAll('.wa-green');
+        
+        // Warna: Hijau Standar (#008069) vs Hijau Gelap Chat (#075e54)
+        const targetColor = (tab === 'chat') ? '#075e54' : '#008069';
+
+        greenElements.forEach(el => {
+            el.style.transition = 'background-color 0.3s ease'; // Kasih animasi biar halus
+            el.style.backgroundColor = targetColor;
+        });
+        
+        // Opsional: Ubah warna status bar browser HP (biar menyatu)
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(!metaTheme) {
+            // Kalau belum ada meta theme, bikin baru
+            const meta = document.createElement('meta');
+            meta.name = "theme-color";
+            meta.content = targetColor;
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        } else {
+            metaTheme.setAttribute('content', targetColor);
+        }
+        // ---------------------------------------------
+
+        // 6. Scroll Management
+        if(tab === 'chat') { 
+            setTimeout(scrollToBottom, 50); 
+        } else { 
+            document.getElementById(`view-${tab}`).scrollTop = 0; 
+        }
+
+        // 7. Render Optimasi
+        renderActiveTab();
+    };
     window.toggleModal = (id) => {
         const el = document.getElementById(id); el.classList.toggle('hidden');
         if(!el.classList.contains('hidden')) { 
@@ -529,6 +810,14 @@
             } 
             if(id === 'modal-transfer') updateWalletSelects(); 
             if(id === 'modal-reminder') renderReminderList(); 
+            // --- TAMBAHAN BARU: Render Shopping List saat dibuka ---
+            // --- FIX: Logic Shopping List ---
+            if(id === 'modal-shopping') {
+                setTimeout(() => {
+                    document.getElementById('shop-input').focus();
+                    renderShoppingList(); // Paksa render saat dibuka
+                }, 50);
+            }
         }
     };
     
@@ -654,6 +943,25 @@
     }
 
     window.addUser = async () => { const name=document.getElementById('new-user-name').value.trim(); if(name) { const pin = prompt(`PIN untuk ${name}?`, "123456"); if(!pin) return; if(!config.users) config.users = []; if(config.users.some(u => u.name.toLowerCase() === name.toLowerCase())) return alert("User sudah ada!"); config.users.push({name, role:document.getElementById('new-user-role').value, pin}); await saveConfig(); document.getElementById('new-user-name').value=''; renderConfigList(); if(config.users.length===1) renderLoginUsers(); } };
+    // --- FITUR GANTI PIN USER ---
+    window.updateUserPin = async (name) => {
+        const newPin = prompt(`Masukkan PIN baru untuk user "${name}":`);
+        
+        // Cek jika user menekan Cancel atau input kosong
+        if (newPin === null) return; 
+        if (newPin.trim() === "") return alert("PIN tidak boleh kosong!");
+        if (newPin.length < 4) return alert("PIN minimal 4 karakter supaya aman.");
+
+        // Cari dan Update User
+        const userIndex = config.users.findIndex(u => u.name === name);
+        if (userIndex !== -1) {
+            config.users[userIndex].pin = newPin.trim();
+            await saveConfig();
+            alert(`PIN untuk ${name} berhasil diganti!`);
+        } else {
+            alert("User tidak ditemukan.");
+        }
+    };
     window.deleteUser = async (name) => { if(confirm("Hapus user?")) { config.users = config.users.filter(u=>u.name!==name); await saveConfig(); renderConfigList(); } };
     window.saveReminder = async () => { const title = document.getElementById('remind-title').value; const date = document.getElementById('remind-date').value; const alertBefore = parseInt(document.getElementById('remind-alert').value) || 0; if(!title || !date) return alert("Isi judul dan tanggal!"); if(!config.reminders) config.reminders = []; config.reminders.push({ id: Date.now(), title, date, alertBefore }); await saveConfig(); document.getElementById('remind-title').value = ''; renderReminderList(); renderChat(); toggleModal('modal-reminder'); };
     window.deleteReminder = async (id) => { if(confirm("Hapus?")) { config.reminders = config.reminders.filter(r => r.id !== id); await saveConfig(); renderReminderList(); renderChat(); } };
@@ -883,24 +1191,27 @@
                 let desc = t.label;
                 let subDesc = `${new Date(t.ts).toLocaleDateString()} • ${t.category}`;
                 
+                // Logic Transfer (Sama)
                 if(t.type === 'transfer') {
                     color = isIncoming ? 'text-blue-600' : 'text-orange-500';
-                    if(isIncoming) {
-                        desc = `Diterima dari ${t.wallet}`;
-                        subDesc += ` (${t.label})`;
-                    } else {
-                        desc = `Dikirim ke ${t.targetWallet}`;
-                        subDesc += ` (${t.label})`;
-                    }
+                    if(isIncoming) { desc = `Diterima dari ${t.wallet}`; subDesc += ` (${t.label})`; } 
+                    else { desc = `Dikirim ke ${t.targetWallet}`; subDesc += ` (${t.label})`; }
                 }
 
                 return `
                 <div class="p-3 hover:bg-gray-50 flex justify-between items-center border-b border-gray-100 last:border-0 transition-colors">
-                    <div>
+                    <div class="flex-1 pr-2">
                         <p class="text-xs font-bold text-gray-700">${desc}</p>
                         <p class="text-[10px] text-gray-400">${subDesc}</p>
                     </div>
-                    <span class="text-xs font-bold ${color}">${sign} Rp ${Number(t.amount).toLocaleString()}</span>
+                    <div class="text-right flex flex-col items-end gap-1">
+                        <span class="text-xs font-bold ${color}">${sign} Rp ${Number(t.amount).toLocaleString()}</span>
+                        
+                        ${t.type !== 'transfer' ? 
+                        `<button onclick="useTemplate('${t.label.replace(/'/g, "\\'")}', ${t.amount})" class="text-[8px] bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 px-2 py-0.5 rounded border border-slate-200 font-bold transition-all active:scale-95">
+                            🔄 Bayar Lagi
+                        </button>` : ''}
+                    </div>
                 </div>`;
             }).join('');
         }
@@ -908,9 +1219,19 @@
         modal.classList.remove('hidden');
     };
     function renderConfigList() {
+        // 1. RENDER USER (Update: Tambah tombol Ganti PIN)
         const uList = document.getElementById('list-users-config');
         const users = config.users || [];
-        uList.innerHTML = users.map(u => `<div class="flex justify-between items-center bg-blue-50 px-2 py-1 rounded text-[10px] border border-blue-100"><span class="font-bold text-blue-700">${u.name} <span class="font-normal text-gray-500">(${u.role})</span></span><button onclick="deleteUser('${u.name}')" class="text-red-400 font-bold">×</button></div>`).join('');
+        
+        uList.innerHTML = users.map(u => `
+            <div class="flex justify-between items-center bg-blue-50 px-2 py-1 rounded text-[10px] border border-blue-100">
+                <span class="font-bold text-blue-700">${u.name} <span class="font-normal text-gray-500">(${u.role})</span></span>
+                <div class="flex items-center gap-3">
+                    <button onclick="updateUserPin('${u.name}')" class="text-blue-500 font-bold hover:text-blue-700" title="Ganti PIN">🔑</button>
+                    <button onclick="deleteUser('${u.name}')" class="text-red-400 font-bold hover:text-red-600" title="Hapus User">×</button>
+                </div>
+            </div>
+        `).join('');
 
         document.getElementById('list-wallets-config').innerHTML = Object.entries(config.wallets).map(([name, bal]) => `<div class="flex justify-between items-center bg-indigo-50 px-2 py-1 rounded text-[10px] border border-indigo-100"><span class="font-bold text-indigo-700">${name} <span class="font-normal text-gray-500">(Awal: ${bal.toLocaleString()})</span></span><div class="flex items-center gap-2"><button onclick="editWallet('${name}')" class="text-blue-500 font-bold">✎</button>${name !== 'Cash' ? `<button onclick="deleteWallet('${name}')" class="text-red-400 font-bold">×</button>` : ''}</div></div>`).join('');
             
@@ -920,7 +1241,7 @@
         
         const chips = config.quickChips || defaultChips;
         document.getElementById('list-chips-config').innerHTML = chips.map((c, index) => `<span class="bg-gray-100 border px-2 py-1 rounded text-[10px] flex items-center gap-1 group">${c} <button onclick="deleteQuickChip(${index})" class="text-red-400 font-bold">×</button></span>`).join('');
-        populateDataCategoryFilter();
+        if(typeof populateDataCategoryFilter === 'function') populateDataCategoryFilter();
     }
 
     window.editWallet = async (name) => {
@@ -1100,17 +1421,39 @@
                 if (daysDiff >= 0 && daysDiff <= r.alertBefore) { stickyContainer.innerHTML += `<div class="bubble-system px-4 py-2 w-full mb-2"><p class="font-bold text-yellow-700">🔔 ${r.title}</p><p class="text-xs text-slate-500">${daysDiff === 0 ? 'HARI INI!' : (daysDiff + ' hari lagi')}</p></div>`; }
             });
         }
-        const sortedTx = transactions.slice().sort((a,b) => new Date(a.ts) - new Date(b.ts));
-        sortedTx.forEach(t => { 
+        // 1. Urutkan semua transaksi dari lama ke baru
+        const allSorted = transactions.slice().sort((a,b) => new Date(a.ts) - new Date(b.ts));
+        
+        // 2. Ambil hanya 'chatLimit' pesan TERAKHIR (slice dari belakang)
+        // Jika chatLimit 20, ambil 20 terakhir.
+        const startIndex = Math.max(0, allSorted.length - chatLimit);
+        const limitedTx = allSorted.slice(startIndex);
+
+        // 3. Render Loop (Hanya render yang sudah dilimit)
+        limitedTx.forEach(t => { 
             const isMe = t.user === currentUser; 
             const dateStr = new Date(t.ts).toLocaleDateString('id-ID', {day:'numeric', month:'short'});
-            if(t.type === 'alert') { list.innerHTML += `<div class="flex justify-center w-full px-4 animate-bounce"><div class="bubble-alert">${t.label}<button onclick="deleteTx('${t.id}')" class="ml-2 text-red-800 font-bold border border-red-300 rounded px-1 text-[9px]">✕</button></div></div>`; return; }
-            if(t.type === 'transfer') { list.innerHTML += `<div class="flex justify-center my-2"><div class="bubble-transfer"><span class="font-bold text-blue-700">TF</span> ${t.wallet} ➜ ${t.targetWallet}<br><span class="font-black text-lg">Rp ${Number(t.amount).toLocaleString()}</span><br><span class="text-[10px] text-gray-400 italic">(${t.label})</span>${isMe?`<button onclick="deleteTx('${t.id}')" class="ml-2 text-red-400 font-bold">×</button>`:''}</div></div>`; return; }
+            
+            if(t.type === 'alert') { 
+                list.innerHTML += `<div class="flex justify-center w-full px-4 mb-2"><div class="bubble-alert">${t.label}<button onclick="deleteTx('${t.id}')" class="ml-2 text-red-800 font-bold border border-red-300 rounded px-1 text-[9px]">✕</button></div></div>`; 
+                return; 
+            }
+            if(t.type === 'transfer') { 
+                list.innerHTML += `<div class="flex justify-center my-2"><div class="bubble-transfer"><span class="font-bold text-blue-700">Transfer :</span> ${t.wallet} ➜ ${t.targetWallet}<br><span class="font-black text-lg">Rp ${Number(t.amount).toLocaleString()}</span><br><span class="text-[10px] text-gray-400 italic">(${t.label})</span>${isMe?`<button onclick="deleteTx('${t.id}')" class="ml-2 text-red-400 font-bold">×</button>`:''}</div></div>`; 
+                return; 
+            }
+            
             const color = t.type === 'income' ? 'text-inc' : 'text-exp';
             const statusClass = t.status === 'pending' ? 'bubble-pending' : 'bubble-synced';
             const syncDot = t.status === 'synced' ? 'sync-synced' : 'sync-pending';
+            
             list.innerHTML += `<div class="flex ${isMe?'justify-end':'justify-start'} w-full"><div class="bubble ${isMe?'bubble-me':'bubble-other'} ${statusClass}"><div class="bubble-header flex justify-between items-center"><span>${t.category} • ${t.wallet}</span>${isMe?`<span class="sync-dot ${syncDot}"></span><button onclick="deleteTx('${t.id}')" class="text-red-400 font-bold ml-2">×</button>`:''}</div><div class="bubble-content font-medium">${t.label}</div><div class="bubble-amount ${color}">Rp ${Number(t.amount).toLocaleString()}</div><div class="bubble-footer">${t.user} • ${dateStr}</div></div></div>`;
         });
+
+        // 4. Tambahan Info di paling atas jika masih ada pesan tersembunyi
+        if (startIndex > 0) {
+            list.insertAdjacentHTML('afterbegin', '<p class="text-[9px] text-gray-400 text-center py-2 italic">Scroll ke atas untuk lihat pesan lama...</p>');
+        }
     }
 
     window.populateDataCategoryFilter = () => {
@@ -1275,15 +1618,19 @@
         }
 
         content.innerHTML = filtered.map(t => `
-            <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                <div>
+            <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group">
+                <div class="flex-1 pr-2">
                     <p class="font-bold text-sm text-gray-700">${t.label}</p>
                     <p class="text-[10px] text-gray-400">${new Date(t.ts).toLocaleDateString()} • ${t.wallet}</p>
                 </div>
-                <div class="text-right">
+                <div class="text-right flex flex-col items-end gap-1">
                     <p class="font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
                         ${Number(t.amount).toLocaleString('id-ID')}
                     </p>
+                    ${t.type !== 'transfer' ? 
+                    `<button onclick="useTemplate('${t.label.replace(/'/g, "\\'")}', ${t.amount})" class="text-[9px] bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 px-2 py-1 rounded border border-slate-200 font-bold transition-all flex items-center gap-1 active:scale-95">
+                        🔄 Bayar Lagi
+                    </button>` : ''}
                 </div>
             </div>
         `).join('');
@@ -1348,13 +1695,101 @@
         alert("Snapshot Net Worth tersimpan! 📸");
         renderInquiry(); // Refresh chart
     };
-    
-    window.renderUI = () => { updateHeader(); renderChat(); renderDataList(); renderStats(); renderInquiry(); renderPlanning(); };
-    function updateHeader() { document.getElementById('user-avatar').innerText = currentUser.charAt(0).toUpperCase(); document.getElementById('status-text').innerText = db ? `(online) ${currentUser}` : `(local) ${currentUser}`; document.getElementById('sync-status').className = db ? "w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse border border-emerald-200" : "w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"; }
+   
+    // --- OPTIMASI: RENDER HANYA YANG AKTIF ---
+    window.renderActiveTab = () => {
+        // Cek tab mana yang tidak punya class 'hidden'
+        if (!document.getElementById('view-chat').classList.contains('hidden')) {
+            renderChat();
+        } else if (!document.getElementById('view-data').classList.contains('hidden')) {
+            renderDataList();
+        } else if (!document.getElementById('view-report').classList.contains('hidden')) {
+            renderStats();
+        } else if (!document.getElementById('view-inquiry').classList.contains('hidden')) {
+            renderInquiry();
+        } else if (!document.getElementById('view-plan').classList.contains('hidden')) {
+            renderPlanning();
+        }
+    };
+    window.renderUI = () => { 
+        updateHeader(); 
+        // Dulu: Memanggil renderChat(), renderDataList(), renderStats(), dll sekaligus.
+        // Sekarang: Cuma panggil ini satu baris:
+        renderActiveTab(); 
+    };
+    function updateHeader() { document.getElementById('user-avatar').innerText = currentUser.charAt(0).toUpperCase(); document.getElementById('status-text').innerText = db ? `(🌐 online) ${currentUser}` : `(💾local) ${currentUser}`; document.getElementById('sync-status').className = db ? "w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse border border-emerald-200" : "w-2.5 h-2.5 bg-red-400 rounded-full border border-white/20"; }
     function validateUser() { if(!config.users || config.users.length === 0) { alert("Buat user dulu!"); return false; } return true; }
     
-    async function saveConfig() { localStorage.setItem('wa_config', JSON.stringify(config)); if(db) try{await setDoc(doc(db, COL_DATA, DOC_CONFIG), config);}catch(e){} }
-    function setupFirebase() { const c = localStorage.getItem('wa_firebase_config'); if(c) { try { const app = initializeApp(JSON.parse(c)); db = getFirestore(app); auth = getAuth(app); onAuthStateChanged(auth, u => { if(!u) signInAnonymously(auth); updateHeader(); onSnapshot(query(collection(db, COL_TX), orderBy('timestamp','asc')), s => { transactions = s.docs.map(d=>({id:d.id, ...d.data(), ts:d.data().timestamp?.toDate().toISOString(), status: 'synced'})); renderUI(); }); onSnapshot(doc(db, COL_DATA, DOC_CONFIG), s => { if(s.exists()) { config = s.data(); localStorage.setItem('wa_config', JSON.stringify(config)); renderConfigList(); updateWalletSelects(); renderUI(); renderReminderList(); } }); }); } catch(e){} } else updateHeader(); }
+    // --- UPDATE 2: SAVE CONFIG (Proteksi Belanja) ---
+    async function saveConfig() { 
+        localStorage.setItem('wa_config', JSON.stringify(config)); 
+        if(db) {
+            try {
+                // Simpan Full Config (termasuk shopping list & quick chips)
+                // JSON.parse/stringify untuk membersihkan undefined values
+                const cleanConfig = JSON.parse(JSON.stringify(config)); 
+                await setDoc(doc(db, COL_DATA, DOC_CONFIG), cleanConfig, { merge: true });
+            } catch(e) {
+                console.error("Save Error:", e);
+                alert("⚠️ Gagal simpan: " + e.message);
+            }
+        }
+    }
+    
+    // --- GANTI FUNGSI INI (PENTING) ---
+    function setupFirebase() { 
+        const c = localStorage.getItem('wa_firebase_config'); 
+        if(c) { 
+            try { 
+                const app = initializeApp(JSON.parse(c)); 
+                db = getFirestore(app); 
+                auth = getAuth(app); 
+                
+                onAuthStateChanged(auth, u => { 
+                    if(!u) signInAnonymously(auth); 
+                    updateHeader(); 
+                    
+                    // Sync Transaksi
+                    onSnapshot(query(collection(db, COL_TX), orderBy('timestamp','asc')), s => { 
+                        transactions = s.docs.map(d=>({id:d.id, ...d.data(), ts:d.data().timestamp?.toDate().toISOString(), status: 'synced'})); 
+                        renderUI(); 
+                    }); 
+                    
+                    // Sync Config
+                    onSnapshot(doc(db, COL_DATA, DOC_CONFIG), s => { 
+                        if(s.exists()) { 
+                            const serverData = s.data();
+                            // === FIX: Langsung pakai data server ===
+                            // Merge sudah dijamin aman karena pakai { merge: true }
+                            config = serverData;
+                            
+                            // Pastikan array exist (default value)
+                            if(!config.shoppingList || !Array.isArray(config.shoppingList)) {
+                                config.shoppingList = [];
+                            }
+                            if(!config.quickChips) config.quickChips = defaultChips;
+                            if(!config.netWorthHistory) config.netWorthHistory = [];
+                            
+                            localStorage.setItem('wa_config', JSON.stringify(config)); 
+                            
+                            // Refresh semua
+                            renderConfigList(); 
+                            updateWalletSelects(); 
+                            renderUI(); 
+                            renderReminderList();
+                            
+                            // Jika modal belanja terbuka, refresh listnya
+                            // ⚠️ TAMBAHKAN BARIS INI:
+                            if(!document.getElementById('modal-shopping').classList.contains('hidden')) {
+                                renderShoppingListInternal(); // Ganti dari window.renderShoppingList()
+                                console.log("🔄 Shopping auto-synced:", config.shoppingList);
+                            }
+                        } 
+                    }); 
+                }); 
+            } catch(e){ console.error("Firebase Init Error:", e); } 
+        } else updateHeader(); 
+    }
     window.saveSettings = () => { localStorage.setItem('wa_firebase_config', document.getElementById('firebase-config-input').value); location.reload(); };
 
     window.scrollToBottom = () => { const el = document.getElementById('view-chat'); el.scrollTop = el.scrollHeight; };
@@ -1387,7 +1822,29 @@
         if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) { e.preventDefault(); return false; }
         if (e.ctrlKey && e.key.toUpperCase() === 'U') { e.preventDefault(); return false; }
     });
+    // --- FITUR 1: TEMPLAT CEPAT (BAYAR LAGI) ---
+    window.useTemplate = (label, amount) => {
+        // 1. Tutup semua modal yang mungkin terbuka
+        document.getElementById('modalMutasi').classList.add('hidden');
+        document.getElementById('modal-mutation').classList.add('hidden');
 
+        // 2. Pindah ke Tab Chat
+        switchTab('chat');
+
+        // 3. Isi Kolom Chat Otomatis
+        const input = document.getElementById('msg-input');
+        // Bersihkan label dari kata-kata yang mungkin duplikat jika ada
+        // Format: "Label Nominal" (Contoh: "Warkop 8000")
+        input.value = `${label} ${Math.abs(amount)}`; 
+        
+        // 4. Fokus ke input biar siap enter
+        input.focus();
+        
+        // (Opsional) Efek visual biar ngeh
+        input.classList.add('bg-yellow-50');
+        setTimeout(() => input.classList.remove('bg-yellow-50'), 500);
+    };
+   
 </script>
 </body>
 </html>
